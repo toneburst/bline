@@ -1,2 +1,2 @@
 # Bline
-Parametric acid bassline sculptor for Monome Norns
+Parametric acid bassline sculptor script for Monome Norns
