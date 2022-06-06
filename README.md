@@ -12,6 +12,8 @@ A parametric acid bassline sculptor script for Monome Norns
 - Hardware or software tb-303 emulator
 - MIDI interface or USB cable to connect to the above
 
+tb-303 emulator should apply accent to received MIDI notes with a high velocity values (threshold adjustable) and slide to overlapping notes ("mono-legato" mode).
+
 #### Recommended
 
 - MIDI controller with multiple sliders, knobs or encoders for parameter-mapping
