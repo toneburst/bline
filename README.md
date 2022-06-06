@@ -37,8 +37,9 @@ Roadmap for future development includes
 - Additional output modes
 - Updated Quantiser module
 - Assignable functions for K3
-- Grid support
-- Arc support
+- Momentary pattern-transform FX 
+- Grid support for specific parameters (pattern-lengths, offsets, pattern-transform FX)
+- Arc support for key params
 - Preset system (instant save/recall)
 - MIDI file export
 
