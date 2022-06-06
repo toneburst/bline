@@ -6,9 +6,15 @@ A parametric acid bassline sculptor script for Monome Norns
 
 ## Prerequisites:
 
+### Required
+
 - Original Norns, Norns Shield or Fates
 - Hardware or software tb-303 emulator
 - MIDI interface or USB cable to connect to the above
+
+### Recommended
+
+- MIDI controller with multiple sliders, knobs or encoders for parameter-mapping
 
 ## Quick-Start:
 
