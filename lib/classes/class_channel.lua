@@ -278,14 +278,15 @@ end -- End Channel:updateJitterVals(jitter_vals)
 -- Update channel step and bar counters
 function Channel:updateCounters(m_counter)
 
-    local m_counter = m_counter or 1
+	-- Ensure counter is set to 1 if initially unset (ie nil)
+    local counter = m_counter or 1
 
-    -- Counts 1-16 over one bar irrespective of step-counter wrap/offset
+	-- Counts 1-16 over one bar irrespective of step-counter wrap/offset
 	-- Used to apply fixed value to first step in bar
     self.barCounter = NornsUtils.wrap(self.barCounter + 1, 1, 16)
 
     -- Update step counter, with offset and wrapping
-	self.currentStep = NornsUtils.wrap(NornsUtils.wrap(m_counter, 1, self.patternLength) +  self.patternOffset, 1, 16)
+	self.currentStep = NornsUtils.wrap(NornsUtils.wrap(counter, 1, self.patternLength) +  self.patternOffset, 1, 16)
 
 	self.channelState["step_index"] = self.currentStep
 
@@ -437,6 +438,13 @@ function Channel:tick(m_counter)
 
     --print(self.channelName .. " object tick " .. m_counter)
 
+	-- Reset channel step-counters if master counter = 1
+	if (m_counter == 1) then
+		self.barCounter = 1
+		self.currentStep = 1
+		--print(self.channelName .. " currentStep: ".. self.currentStep)
+	end
+
     local step_val
 
     -- Force value of first step in bar if first_val set non-nil at channel init
@@ -446,7 +454,7 @@ function Channel:tick(m_counter)
         step_val = self.pattern[self.currentStep]
     end -- End if (self.barCounter == 1) and (self.firstVal ~= nil)
 
-    -- Update local step-counter
+    -- Update local step-counter for next step
     self:updateCounters(m_counter)
 
     -- Return step value

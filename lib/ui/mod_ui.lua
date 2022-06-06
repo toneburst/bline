@@ -7,6 +7,8 @@ local UILib = require "ui"
 local NornsUtils = require "lib.util"
 local Graph = require "lib.graph"
 
+local splash_playing = true
+
 -- Params data for pages
 local page_params = {
 	-- Page 1
@@ -533,43 +535,68 @@ local function drawPageXY(draw_x, draw_y, x_pos, y_pos)
 end
 
 ------------------------------------------
+-- Play Splash/Loading Animation ---------
+------------------------------------------
+
+function UI.playSplash()
+
+	-- Set timer for 5 seconds
+	clock.run(function()
+			clock.sleep(5)
+			splash_playing = false
+		end
+	)
+
+end -- End UI.playSplash()
+
+------------------------------------------
 -- Redraw Function -----------------------
 ------------------------------------------
 
 function UI.redraw(channel_states, step_state)
 
-	UI.channelStates = channel_states
-	UI.stepState = step_state
+	-- Play splash animation if flag set
+	if (splash_playing == true) then
 
-	-- Enable anti-aliasing
-    screen.aa(0)
-	screen.clear()
+		UI.playSplash()
 
-	-- Draw titlebar
-	drawTitleBar()
-
-	-- Draw Notes channel graph
-	-- Args: (channel, label, bar_width, y_pos, pre_scale, pre_offset, type)
-	drawPattern(UI.channelStates["notes"], "n", 3, 0, 1, 0, "val")
-	drawPattern(UI.channelStates["octaves"], "o", 3, 11, 2, -1, "val")
-	drawPattern(UI.channelStates["accents"], "a", 3, 21, 6, 1, "bool")
-	drawPattern(UI.channelStates["slides"], "s", 3, 31, 6, 1, "bool")
-	drawPattern(UI.channelStates["rests"], "r", 3, 41, 6, 1, "bool")
-
-	-- Draw Pages
-	if (UI.pageIndex == 1) then
-		drawPageXY(UI.pageDrawX, UI.pageDrawY,
-			params:get(page_params[1][1][1]["param"]),
-			params:get(page_params[1][1][2]["param"])
-		)
 	else
-		drawPage(UI.pageDrawX, UI.pageDrawY)
-	end
+		-- Else display UI
 
-	-- Draw note info
-	if (UI.stepState ~= nil) then
-		drawNoteInfo(UI.stepState, 79, 62)
-	end
+		UI.channelStates = channel_states
+		UI.stepState = step_state
+
+		-- Enable anti-aliasing
+	    screen.aa(0)
+		screen.clear()
+
+		-- Draw titlebar
+		drawTitleBar()
+
+		-- Draw Notes channel graph
+		-- Args: (channel, label, bar_width, y_pos, pre_scale, pre_offset, type)
+		drawPattern(UI.channelStates["notes"], "n", 3, 0, 1, 0, "val")
+		drawPattern(UI.channelStates["octaves"], "o", 3, 11, 2, -1, "val")
+		drawPattern(UI.channelStates["accents"], "a", 3, 21, 6, 1, "bool")
+		drawPattern(UI.channelStates["slides"], "s", 3, 31, 6, 1, "bool")
+		drawPattern(UI.channelStates["rests"], "r", 3, 41, 6, 1, "bool")
+
+		-- Draw Pages
+		if (UI.pageIndex == 1) then
+			drawPageXY(UI.pageDrawX, UI.pageDrawY,
+				params:get(page_params[1][1][1]["param"]),
+				params:get(page_params[1][1][2]["param"])
+			)
+		else
+			drawPage(UI.pageDrawX, UI.pageDrawY)
+		end
+
+		-- Draw note info
+		if (UI.stepState ~= nil) then
+			drawNoteInfo(UI.stepState, 79, 62)
+		end
+
+	end -- End if (splash_playing == true)
 
 	screen.update()
 
@@ -608,7 +635,7 @@ end -- End UI.handleEncoders(n, delta)
 
 function UI.handleButtons(i)
 
-	if (i == 3) then
+	if (i == 2) then
 		-- Toggle 1, 2
 		-- Source: https://forums.cockos.com/showthread.php?t=254657
 		UI.controlIndex = UI.controlIndex == 2 and 1 or 2

@@ -172,7 +172,6 @@ function PatternGenerator.addParams()
 		end
 	)
 
-
 	-- Add Clock Swing control
 	params:add_number(
 		"pgen_clock_swing",
@@ -275,6 +274,7 @@ function PatternGenerator.updateJitterVals()
 
 end -- End PatternGenerator.updateJitterXY()
 
+
 --------------------------------------------------
 -- Get All Patterns ------------------------------
 --------------------------------------------------
@@ -314,8 +314,8 @@ function PatternGenerator.calculateStepNote()
 
 	-- Get quantised note index and Quantiser state for current step
     local final_note, quantiser_state = quantiser.applyScale(
-		PatternGenerator.channels["notes"]:tick(PatternGenerator.masterStepCounter),  -- Note
-		PatternGenerator.channels["octaves"]:tick(PatternGenerator.masterStepCounter) -- Octave
+		PatternGenerator.channels["notes"]:tick(PatternGenerator.masterStepCounter),
+		PatternGenerator.channels["octaves"]:tick(PatternGenerator.masterStepCounter)
 	)
 
 	-- Update note-data
@@ -389,7 +389,7 @@ function PatternGenerator.tick()
 			-- I don't know if it's good practice to exploit this
 			-- but callback seems able to access locals declared above
 			clock.sleep(len1)
-			-- Do note, sending 2nd (swung) step length as arg
+			-- Do step, sending 2nd (swung) step length as arg
 			PatternGenerator.doStep(len2)
 			-- Force UI update on 2nd step, too
 			SCREEN_DIRTY = true
@@ -397,6 +397,17 @@ function PatternGenerator.tick()
 	)
 
 end -- End PatternGenerator.doStep()
+
+--------------------------------------------------
+-- Reset Master Counter --------------------------
+--------------------------------------------------
+
+function PatternGenerator.resetCounters()
+
+	PatternGenerator.barCounter = 1
+	PatternGenerator.masterStepCounter = 1
+
+end
 
 --------------------------------------------------
 -- Send All-Notes --------------------------------

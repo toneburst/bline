@@ -22,13 +22,6 @@ MIDIOutCC.velocityNonAccent = 100
 MIDIOutCC.velocityAccent = 127
 -- Octave-shift
 MIDIOutCC.octaveShift = 0
-
--- Default CC numbers (General MIDI)
-MIDIOutCC.CCCutoff = nil
-MIDIOutCC.CCFilterDecay = nil
-MIDIOutCC.CCFilterModAmt = nil
-MIDIOutCC.CCSlideTime = nil
-
 -- Debug mode toggle
 MIDIOutCC.debugMode = false
 
@@ -81,7 +74,7 @@ function MIDIOutCC.addParams()
 		name = "Non-Accent Velocity",
 		min = 0,
 		max = 127,
-		default = MIDIOutCC.velocityNonAccent,
+		default = 100,
 		action = function(x)
 			MIDIOutCC.velocityNonAccent = x
 		end
@@ -94,7 +87,7 @@ function MIDIOutCC.addParams()
 		name = "Accent Velocity",
 		min = 0,
 		max = 127,
-		default = MIDIOutCC.velocityAccent,
+		default = 127,
 		action = function(x)
 			MIDIOutCC.velocityAccent = x
 		end
@@ -109,6 +102,7 @@ function MIDIOutCC.addParams()
 			MIDIOutCC.allNotesOff()
 		end
 	}
+
 
 	-- Hide param group
 	params:hide(MIDIOutCC.paramGroupName)

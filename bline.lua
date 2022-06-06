@@ -1,36 +1,74 @@
 --
--- bline
--- Parametric bassline
--- sculptor
--- 1.0.0 @toneburst
--- llllllll.co/t/bline
+-- bLine
+-- Parametric Acid
+-- Bassline Sculptor
 --
--- Bassline sculptor
+-- 1.0.0 @toneburst
 --
 -- E1 : Change page
 -- E2 : Param 1
 -- E3 : Param 2
--- K2 : Play/Pause
--- K3 : Toggle param group
+-- K2 : Toggle param group
+-- K3 : Unassigned
+--
+-- Not all parameters exposed
+-- in the UI. Mapping Params
+-- to MIDI controller
+-- recommended!
+--
+--
+--                      H
+--                      |
+--                H  H  C--H
+--                 `.|,'|
+--                   C  H  H
+--                   |     |
+--              O    N  H  C
+--              \\ ,' `.|,'|`.
+--                C     C  H  H
+--                |     |
+--             H--C     H
+--              ,' `.
+--       H  H--C  H--C--H
+--       |     ||    |
+-- H     C     C     N  H  H
+--  `. ,' `. ,' `. ,' `.|,'
+--    C  _  C  H  C     C
+--    | (_) |   `.|     |
+--    C     C     C     H
+--  ,' `. ,' `. ,' `.
+-- H     C     C     H
+--       |    ||
+--       N-----C
+--       |     |
+--       H     H
 --
 
 BLINE_UTILS = include("lib/modules/mod_bline_utils")
 
+-- Require Audio module
+local audio = require "audio"
+
 -- Include pattern generator
 local pattern_generator = include('lib/modules/mod_pattern_generator')
+
 -- include UI
 local ui = include('lib/ui/mod_ui')
 
 -- Add shonky 303 engine
 engine.name = "Bline_Synth"
 
+-- Sequencer running flag
+running = true
+
+-- Sequencer eset flag
+reset = false
+
 -- Screen and pattern dirty flags (global)
 SCREEN_DIRTY = true
 
 ------------------------------------------
-------------------------------------------
 -- Init ----------------------------------
-------------------------------------------
 ------------------------------------------
 
 function init()
@@ -39,9 +77,13 @@ function init()
 
     pattern_generator.init(false)
 
-	-- Initialise UI module ------------------
+	-- Disable pitch-analysis (save CPU) -----
 
-	ui.init(false)
+	audio.pitch_off()
+
+    -- Initialise UI module ------------------
+
+    ui.init(false)
 
     -- Read params from disk if file present at 'data/<scriptname>/<scriptname>.pset'
     params:read()
@@ -50,7 +92,7 @@ function init()
     -- Setup Clocks --------------------------
 
     -- Master sequencer step clock
-    master_clock_id = clock.run(master_clock) -- create master sequencer clock and note the id
+    sequencer_clock_id = clock.run(sequencer_clock) -- create master sequencer clock and note the id
 
     -- Param auto-save clock
     autosave_clock_id = clock.run(autosave_clock) -- create a "autosave_clock" and note the id
@@ -64,106 +106,162 @@ end -- End init()
 -- Norns Encoders ------------------------
 ------------------------------------------
 
--- enc() is automatically called by norns
 function enc(n, delta)
+	-- Pass encoder changes to UI module
 	ui.handleEncoders(n, delta)
-	-- Force screen redraw
-    SCREEN_DIRTY = true
-end -- End enc(n, delta)
+	-- Set flag to update UI display
+	SCREEN_DIRTY = true
+end
 
-------------------------------------------
+-------------------------------------------
 -- Norns Buttons -------------------------
 ------------------------------------------
 
--- key() is automatically called by norns
 function key(k, z)
-	-- Do nothing when you release a key
-    if z == 0 then return end
-    ui.handleButtons(k)
-	-- Force screen redraw
-    SCREEN_DIRTY = true
-end -- End key(k, z)
+	-- Ignore key-up
+	if (z == 0) then
+		return
+	end
+	-- Process key-down (ignore Key 1)
+	if (k == 2) then
+		-- Key 2 key-down. Pass on to UI module
+		ui.handleButtons(k)
+	elseif (k == 3) then
+		-- We will deal with Key 3 here, rather than passing to the UI module
+		-- Toggle transport on/off (this is a neat one-liner for toggling a boolean!)
+		--running = (not running)
+		return
+	end
+	-- Set flag to update UI display
+	SCREEN_DIRTY = true
+end
 
 ------------------------------------------
 -- Configure Clocks ----------------------
 ------------------------------------------
 
--- Master Step clock
-function master_clock()
-    clock.sleep(5)
-	-- Infinite loop
-    while true do
-        -- Sync clock to 1/16 note
-		-- Change to 8th note, and implement swing multiplier
-        clock.sync(1 / 2)
-        -- Execute pattern step
-        pattern_generator.tick()
-    end
-end -- End master_clock()
+-- Master Step clock ---------------------
 
--- Screen-Redraw clock
-function screen_redraw_clock()
-    clock.sleep(5)
+function sequencer_clock()
+	-- Sleep while loading animation plays
+	clock.sleep(5)
+	-- Start sequencer loop
     while true do
-		-- pause for a thirtieth of a second (aka 30fps)
+        -- Sync clock to 1/8th note
+        clock.sync(1 / 2)
+		-- Send reset signal to pattern-generator if 'reset' flag set
+		if (reset == true) then
+			pattern_generator.resetCounters()
+			-- Reset 'reset' flag (ha!)
+			reset = false
+		end
+        -- Check 'running' flag
+		if (running == false) then
+			-- Send reset signal to pattern-generator if 'running' flag set false
+        	pattern_generator.resetCounters()
+			pattern_generator.allNotesOff()
+		else
+			-- Else send signal to pattern-generator to execute step
+			pattern_generator.tick()
+		end
+    end
+end
+
+-- Screen-Redraw clock -------------------
+
+function screen_redraw_clock()
+    while true do
+		-- Pause for a thirtieth of a second (aka 30fps)
         clock.sleep(1 / 30)
-		-- Only redraw if SCREEN_DIRTY has been set true
-        if SCREEN_DIRTY then
+        if SCREEN_DIRTY then ---- only if something changed
             -- Call redraw() function
-			-- Function must be called "redraw()" in order for Norns to disable redraw while System menus active!!
+            -- Function must be called "redraw()" in order for Norns to disable redraw while System menus active!!
             redraw()
             -- Reset dirty flag
             SCREEN_DIRTY = false
         end
     end
-end -- End screen_redraw_clock()
+end
 
--- Auto-Save clock
+-- Auto-Save clock -----------------------
+
 function autosave_clock()
     clock.sleep(10)
     while true do
         clock.sleep(10)
-        -- Auto-save params to disk at data/bline/bline-01.pset' every 10 seconds
+        -- Auto-save params to disk at
+        --'data/bline/bline-01.pset' every 10 seconds
         params:write()
     end
-end -- End autosave_clock()
+end
+
+------------------------------------------
+-- Transport functions -------------------
+------------------------------------------
+
+function clock_start()
+	running = true
+end
+
+function clock_stop()
+	running = false
+end
+
+function clock_reset()
+	reset = true
+end
+
+-- Transport-start callback
+function clock.transport.start()
+	print("clock.transport.start received")
+	clock_start()
+end
+
+-- Transport-stop callback
+function clock.transport.stop()
+	print("clock.transport.stop received")
+    clock_stop()
+end
+
+-- Transport-reset callback
+function clock.transport.reset()
+	print("clock.transport.reset received")
+    clock_reset()
+end
 
 ------------------------------------------
 -- Redraw Function -----------------------
 ------------------------------------------
 
--- redraw() is automatically called by norns
 function redraw()
-	-- Update UI, passing pattern, channel and last-note data
-	ui.redraw(
-		pattern_generator.getChannelStates(),
-		pattern_generator.getStepState()
-	)
+    -- Update UI, passing pattern, channel and last-note data
+    ui.redraw(
+        pattern_generator.getChannelStates(),
+        pattern_generator.getStepState()
+    )
 end -- End redraw()
 
 ------------------------------------------
--- Script-Reload Function ----------------
+-- Script-Reload Functions ---------------
 ------------------------------------------
 
--- Execute reload() in the repl to quickly rerun this script
-function reload()
+function r()
     cleanup()
 	-- https://github.com/monome/norns/blob/main/lua/core/state.lua
     norns.script.load(norns.state.script)
-end -- End reload()
+end
 
 ------------------------------------------
--- Script-Close Cleanup ------------------
+-- Script Close Cleanup ------------------
 ------------------------------------------
 
--- Cleanup() is automatically called on script close
 function cleanup()
-	-- Cancel clocks
-	clock.cancel(master_clock_id) -- Destoy master clock  via the id we noted
+    -- Cancel clocks
+    clock.cancel(sequencer_clock_id) -- Destoy master clock  via the id we noted
     clock.cancel(screen_redraw_clock_id) -- Destroy redraw clock via the id we noted
     clock.cancel(autosave_clock_id) -- Destroy autosave clock via the id we noted
-	-- Silence output devices
-	pattern_generator.allNotesOff()
-	-- Save params
-	params:write()
-end -- End cleanup()
+    -- Silence output devices
+    pattern_generator.allNotesOff()
+    -- Save params
+    params:write()
+end

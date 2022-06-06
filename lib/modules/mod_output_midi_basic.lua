@@ -75,7 +75,7 @@ function MIDIOutBasic.addParams()
 		name = "Non-Accent Velocity",
 		min = 0,
 		max = 127,
-		default = MIDIOutBasic.velocityNonAccent,
+		default = 100,
 		action = function(x)
 			MIDIOutBasic.velocityNonAccent = x
 		end
@@ -88,7 +88,7 @@ function MIDIOutBasic.addParams()
 		name = "Accent Velocity",
 		min = 0,
 		max = 127,
-		default = MIDIOutBasic.velocityAccent,
+		default = 127,
 		action = function(x)
 			MIDIOutBasic.velocityAccent = x
 		end
@@ -103,6 +103,7 @@ function MIDIOutBasic.addParams()
 			MIDIOutBasic.allNotesOff()
 		end
 	}
+
 
 	-- Hide param group
 	params:hide(MIDIOutBasic.paramGroupName)

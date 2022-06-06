@@ -7,6 +7,8 @@ local deviceName = "Crow X0X Heart"
 
 local CrowX0X = {}
 
+CrowX0X.previousSlide = false
+
 -- Debug mode toggle
 CrowX0X.debugMode = false
 
@@ -79,6 +81,9 @@ end
 
 function CrowX0X.noteOn(note, accent, slide, rest)
 
+	-- Set Crow CV output
+	CrowX0X.crow_send_cv(note / 12)
+
 	-- Set Accent
 	if (accent) then
 		CrowX0X.crow_send_accent_on()
@@ -96,8 +101,8 @@ function CrowX0X.noteOn(note, accent, slide, rest)
 	-- Set note Gate
 	CrowX0X.crow_send_gate_on()
 
-	-- Set Crow CV output
-	CrowX0X.crow_send_cv(note / 12)
+	-- Update previous note slide flag
+	CrowX0X.previousSlide = slide
 
 end -- End CrowX0X.noteOn(note, velocity)
 
@@ -107,6 +112,7 @@ end -- End CrowX0X.noteOn(note, velocity)
 
 function CrowX0X.noteOff(note, overlap)
 
+	-- Don't turn off gate if this is an overlapping note
 	if (not overlap) then
 		CrowX0X.crow_send_gate_off()
 	end
@@ -152,7 +158,7 @@ function CrowX0X.activate()
 	params:show("Crow X0X Output")
 
 	-- Turn off Crow clock output and hide menu items
-	params:set("clock_crow_out",1) -- sets 'crow out' to 'off'
+	params:set("clock_crow_out", 1) -- sets 'crow out' to 'off'
 	params:hide("clock_crow_out") -- hide the 'crow out' param
 	params:hide("clock_crow_out_div") -- hide the 'crow out div' param
 	params:hide("clock_crow_in_div") -- hide the 'crow in div' param
