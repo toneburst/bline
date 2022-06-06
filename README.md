@@ -41,4 +41,4 @@ Roadmap for future development includes
 - Preset system (instant save/recall)
 - MIDI file export
 
-This is a personal project, and I'm a hobbyist programmer, so no guarantees all (or indeed *any*) of these additional features will be implemented.
+This is a personal spare-time project, and I'm a hobbyist programmer, so no guarantees all (or indeed *any*) of these additional features will be implemented.
