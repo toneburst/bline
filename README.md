@@ -4,7 +4,7 @@ Parametric acid bassline sculptor script for Monome Norns
 
 ![bline main screen](https://github.com/toneburst/bline/blob/main/screenshots/bLINE_screen-01.png)
 
-##Quick-Start
+## Quick-Start
 
 - E1 : Change page
 - E2 : Param 1
