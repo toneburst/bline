@@ -22,11 +22,11 @@ Other synths that have a mono-legato mode and allow velocity to modulate note vo
 
 ## Quick-Start:
 
-- E1 : Change page
+- E1 : Change parameter page
 - E2 : Param 1
 - E3 : Param 2
-- K2 : Toggle param group
-- K3 : Unassigned
+- K2 : Toggle parameter group
+- K3 : Currently unassigned
 
 Not all parameters are exposed in the UI display. Mapping Params to MIDI controller recommended!
 
