@@ -36,6 +36,7 @@ Roadmap for future development includes
 
 - Additional output modes
 - Updated Quantiser module
+- Assignable functions for K3
 - Grid support
 - Arc support
 - Preset system (instant save/recall)
