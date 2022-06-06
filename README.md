@@ -29,3 +29,13 @@ Other synths that have a mono-legato mode and allow velocity to modulate note vo
 - K3 : Unassigned
 
 Not all parameters are exposed in the UI display. Mapping Params to MIDI controller recommended!
+
+## Future Development
+
+Roadmap for future development includes
+
+- Additional output modes
+- Updated Quantiser module
+- Grid support
+- Preset system
+- MIDI file export
