@@ -502,8 +502,11 @@ end -- End drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre_off
 
 local function drawPageXY(draw_x, draw_y, x_pos, y_pos)
 
-	local cell_x = math.min(math.floor(x_pos), 3) * 10
-	local cell_y = math.min(math.floor(y_pos), 3) * 10
+	local x = x_pos
+	local y = 4 - y_pos
+
+	local cell_x = math.min(math.floor(x), 3) * 10
+	local cell_y = math.min(math.floor(y), 3) * 10
 
 	-- Draw page frame
 	drawPageFrame(draw_x, draw_y)
@@ -528,7 +531,7 @@ local function drawPageXY(draw_x, draw_y, x_pos, y_pos)
 	screen.fill()
 
 	-- Draw XY position
-	drawCrossHairs(draw_x, draw_y, x_pos, y_pos)
+	drawCrossHairs(draw_x, draw_y, x, y)
 
 	-- Screen title
 	drawPageTitle(UI.currentParams["pageName"])
