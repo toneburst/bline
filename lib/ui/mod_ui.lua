@@ -201,7 +201,7 @@ local function drawTitleBar()
 	-- Draw Title
 	screen.level(0)
 	screen.move(2,6)
-	screen.text("bLINE")
+	screen.text("bline")
 	screen.fill()
 
 	-- Draw bpm
@@ -449,6 +449,7 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 	-- Draw pattern
 	screen.line_width(bar_width)
 
+	-- Loop through pattern steps
 	for i, _ in ipairs(pattern) do
 
 		-- Get value

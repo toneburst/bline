@@ -53,7 +53,6 @@ function Channel:new(o)
 	o.outputScale = 1	-- Step value scale (for number output type)
 	o.outputOffset = 0	-- Step value offset (for number output type)
 
-	o.masterOffset = 0
 	o.masterCounter = 1
 	o.barCounter = 1
 	o.currentStep = 1
@@ -216,9 +215,8 @@ function Channel:addCommonParams()
 		max = 15,
 		default = 0,
 		action = function(x)
+			self.channelState["pattern_offset"] = x
 			self.patternOffset = x
-			-- Add master offset to value stored in pattern state table
-			self.channelState["pattern_offset"] = self.patternOffset + self.masterOffset
 		end
 	}
 
@@ -275,19 +273,6 @@ function Channel:updateJitterVals(vals)
 end -- End Channel:updateJitterVals(jitter_vals)
 
 -----------------------------------------
--- Set Master Offset --------------------
------------------------------------------
-
-function Channel:updateMasterOffset(offset)
-
-	self.masterOffset = offset
-
-	-- Update channel state table
-	self.channelState["pattern_offset"] = self.patternOffset + self.masterOffset
-
-end -- End Channel:updateMasterOffset(offset)
-
------------------------------------------
 -- Update Step-Counters -----------------
 -----------------------------------------
 
@@ -299,19 +284,12 @@ function Channel:updateCounters(m_counter)
 
 	-- Counts 1-16 over one bar irrespective of step-counter wrap/offset
 	-- Used to apply fixed value to first step in bar
-	if (counter == 1) then
-		self.barCounter = 1
-	else
-		self.barCounter = NornsUtils.wrap(self.barCounter + 1, 1, 16)
-	end
+    self.barCounter = NornsUtils.wrap(self.barCounter + 1, 1, 16)
 
     -- Update step counter, with offset and wrapping
-	self.currentStep = NornsUtils.wrap(NornsUtils.wrap(counter, 1, self.patternLength) + self.patternOffset + self.masterOffset, 1, 16)
+	self.currentStep = NornsUtils.wrap(NornsUtils.wrap(counter, 1, self.patternLength) +  self.patternOffset, 1, 16)
 
-	-- Update channel state table
 	self.channelState["step_index"] = self.currentStep
-
-	--print(self.channelState["step_index"])
 
 end -- End Channel:updateCounters()
 
@@ -322,9 +300,7 @@ end -- End Channel:updateCounters()
 -- Update channel index. Determines which channel to look up in node data table
 function Channel:updateChannelIndex(offset)
 
-	-- Offset channel index with wrapping
 	self.channelIndex = NornsUtils.wrap(self.baseChannelIndex + offset, 1, 6)
-	-- Update channel state table
 	self.channelState["channel_index"] = self.channelIndex
 
 	-- Update pattern
@@ -336,7 +312,7 @@ end -- End Channel:updateChannelIndex(offset)
 -- Calculate Channel Pattern ------------
 -----------------------------------------
 
--- Calculate 16-step pattern by bilinear interpolation (MI Grids-style)
+-- Calculate pattern by bilinear interpolation (MI Grids-style)
 -- With position jitter/chaos
 function Channel:calculatePattern()
 
@@ -416,7 +392,6 @@ function Channel:processStepVals(val, step)
 
     -- Apply response-curve to threshold param value
     local threshold = self.param1Value^self.param1Curve
-	-- Apply scale and offset to looked-up value
 	local scaled_val = (val * self.outputScale) + self.outputOffset
 
     -- Return boolean if self.valType is "bool"
@@ -466,8 +441,12 @@ function Channel:tick(m_counter)
 
 	local step_val
 
-	-- Update local step-counter for next step
-	self:updateCounters(m_counter)
+	-- Reset channel step-counters if master counter = 1
+	if (m_counter == 1) then
+		self.barCounter = 1
+		self.currentStep = 1
+		--print(self.channelName .. " currentStep: ".. self.currentStep)
+	end
 
     -- Force value of first step in bar if first_val set non-nil at channel init
     if (self.barCounter == 1) and (self.firstVal ~= nil) then
@@ -475,6 +454,9 @@ function Channel:tick(m_counter)
     else
         step_val = self.pattern[self.currentStep]
     end -- End if (self.barCounter == 1) and (self.firstVal ~= nil)
+
+    -- Update local step-counter for next step
+    self:updateCounters(m_counter)
 
     -- Return step value
     return step_val

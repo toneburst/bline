@@ -17,7 +17,7 @@ Output.outputType = 1
 Output.outputFunctions = {}
 Output.outputFunctions[1] = include("lib/modules/mod_output_bline_synth")
 Output.outputFunctions[2] = include("lib/modules/mod_output_midi_basic")
-Output.outputFunctions[3] = include("lib/modules/mod_output_crow_x0x")
+--Output.outputFunctions[3] = include("lib/modules/mod_output_crow_x0x")
 --Output.outputFunctions[4] = include("lib/modules/mod_output_midi_cc")
 --Output.outputFunctions[5] = include("lib/modules/mod_output_crow_envs")
 
@@ -29,9 +29,9 @@ Output.outputDevice = Output.outputFunctions[1]
 Output.outputDevices = {}
 Output.outputDevices[1] = "Internal Synth"
 Output.outputDevices[2] = "MIDI Basic"
-Output.outputDevices[3] = "Crow X0X"
--- Output.outputDevices[4] = "MIDI + CCs"
--- Output.outputDevices[5] = "Crow Envelopes"
+--Output.outputDevices[3] = "Crow X0X"
+--Output.outputDevices[4] = "MIDI + CCs"
+--Output.outputDevices[5] = "Crow Envelopes"
 
 Output.previousNote = {
 	note = 0,

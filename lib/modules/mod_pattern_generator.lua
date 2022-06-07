@@ -87,7 +87,7 @@ function PatternGenerator.addParams()
     print("Adding Pattern-Generator parameters")
 
 	-- Add param group
-    params:add_group("Bline Global", 7)
+    params:add_group("Bline Global", 8)
 
 	-- Add Position X param
     params:add_control(
@@ -172,6 +172,23 @@ function PatternGenerator.addParams()
 		end
 	)
 
+	-- Master offset
+    params:add_number(
+		"pgen_master_offset",
+		"Master Offset",
+		0,
+		15,
+		0
+	)
+	params:set_action(
+		"pgen_master_offset",
+		function(x)
+			PatternGenerator.masterOffset = x
+			PatternGenerator.updateMasterOffset(PatternGenerator.masterOffset)
+			SCREEN_DIRTY = true
+		end
+	)
+
 	-- Add Clock Swing control
 	params:add_number(
 		"pgen_clock_swing",
@@ -225,6 +242,7 @@ end -- End Pattern_Generator:update_counters()
 -- Swap Channel Indices --------------------------
 --------------------------------------------------
 
+-- Send signal to channels to rotate node channel indices
 function PatternGenerator.swapChannels()
 
 	-- Update all channel indices
@@ -232,12 +250,26 @@ function PatternGenerator.swapChannels()
 		c:updateChannelIndex(PatternGenerator.channelDataOffset)
 	end
 
-end -- End PatternGenerator.swapChannels()
+end -- End PatternGenerator.swapChannels
+
+--------------------------------------------------
+-- Update Channel Master Offset ------------------
+--------------------------------------------------
+
+function PatternGenerator.updateMasterOffset(offset)
+
+	-- Update all channel master offset values
+	for _, c in pairs(PatternGenerator.channels) do
+		c:updateMasterOffset(offset)
+	end
+
+end
 
 --------------------------------------------------
 -- Update Channel Patterns -----------------------
 --------------------------------------------------
 
+-- Send signal to channels to update their patterns
 function PatternGenerator.updatePatterns()
 
 	--print("updating patterns")
