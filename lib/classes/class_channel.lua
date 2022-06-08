@@ -341,7 +341,7 @@ end -- End Channel:updateChannelIndex(offset)
 function Channel:calculatePattern()
 
 	-- Position jitter values
-	local j_amt = params:get("pgen_pos_jitter")^2--self.jitterScale^2
+	local j_amt = (params:get("pgen_pos_jitter")^2) * (self.jitterScale^2)
 
 	-- Local vars for position X and Y
 	local pos_x, pos_y = 0

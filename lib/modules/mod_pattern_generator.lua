@@ -18,6 +18,14 @@ local channel = include("lib/classes/class_channel")
 -- Include note-player
 local output = include("lib/modules/mod_output")
 
+-- Require bline utils module
+local bline_utils = include("lib/modules/mod_bline_utils")
+--local bline_utils = require(_path.code .. "bline/lib/modules/mod_bline_utils")
+
+--------------------------------------------------
+-- Local Variables -------------------------------
+--------------------------------------------------
+
 -- Master clock reset counts
 local reset_counts = {}
 reset_counts[1] = 8
@@ -36,8 +44,39 @@ reset_names[4] = "4 Bars"
 reset_names[5] = "8 Bars"
 reset_names[6] = "16 Bars"
 
--- Init module table
+-- Key 3 functions table
+local k3_functions = {}
+k3_functions[1] = {
+	-- Do nothing
+	label = "--",
+	keydown = function() print("Key 3 unassigned"); end,
+	keyup = function() print("Key 3 unassigned"); end
+}
+k3_functions[2] = {
+	-- Reset sequencer position
+	label = "Reset",
+	keydown = function() RESET = true; end,
+	keyup = function() end
+}
+k3_functions[3] = {
+	-- Toggle sequencer start/stop
+	label = "Start/Stop",
+	keydown = function()
+		-- Negate RUNNING flag (ie toggle true/false)
+		RUNNING = (not RUNNING)
+	end,
+	keyup = function() end
+}
+
+--------------------------------------------------
+-- Init Module Table -----------------------------
+--------------------------------------------------
+
 local PatternGenerator = {}
+
+--------------------------------------------------
+-- Table Variables -------------------------------
+--------------------------------------------------
 
 -- Node matrix position
 PatternGenerator.posX = 0
@@ -54,7 +93,7 @@ PatternGenerator.channels = {
 	rests = {}
 }
 
--- Table of all channel patterns (to pass on to UI function)
+-- Table of all channel patterns (to pass on to UI function for display)
 PatternGenerator.patterns = {
     note = {},
     octave = {},
@@ -77,6 +116,8 @@ PatternGenerator.loopLength = 16
 PatternGenerator.channelDataOffset = 0
 -- Debug mode toggle
 PatternGenerator.debugMode = false
+-- Norns Key 3 Assignment index
+PatternGenerator.k3Assign = 1
 
 --------------------------------------------------
 -- Add Params ------------------------------------
@@ -172,7 +213,7 @@ function PatternGenerator.addParams()
 		end
 	)
 
-	-- Master offset
+	-- Add aster offset param
     params:add_number(
 		"pgen_master_offset",
 		"Master Offset",
@@ -189,13 +230,42 @@ function PatternGenerator.addParams()
 		end
 	)
 
-	-- Add Clock Swing control
-	params:add_number(
+	--params:add_control("cutoff","cutoff",controlspec.new(50,5000,'exp',0,555,'hz'))
+	-- Add Clock Swing param
+	params:add_control(
 		"pgen_clock_swing",
 		"Clock Swing",
-		0,
-		100,
-		0
+		controlspec.new(0,100,'lin',1,0,'%')
+	)
+
+	-- Rebuild params table
+	_menu.rebuild_params()
+
+end -- End PatternGenerator.addParams()
+
+--------------------------------------------------
+-- Add Params ------------------------------------
+--------------------------------------------------
+
+function PatternGenerator.addConfigParams()
+
+    print("Adding Bline config parameters")
+
+	-- Add param group
+    params:add_group("Bline Config", 1)
+
+	params:add_option(
+		"config_k3_assign",
+		"K3 Function",
+		bline_utils.getKeyVals(k3_functions, "label"),
+		--{"--", "Reset", "Start/Stop"},
+		1
+	)
+	params:set_action(
+		"config_k3_assign",
+		function(x)
+			PatternGenerator.k3Assign = x
+		end
 	)
 
 	-- Rebuild params table
@@ -394,7 +464,8 @@ end -- End atternGenerator.doStep()
 
 function PatternGenerator.tick()
 
-	-- Unswung step-length
+	-- Unswung step-length (8th note)
+	-- Plays odd-numbered steps, 1, 3, 5 etc.
 	local step_length = clock.get_beat_sec() / 4
 
 	-- Scaled swing amount 0-0.5
@@ -416,6 +487,7 @@ function PatternGenerator.tick()
 	SCREEN_DIRTY = true
 
 	-- Schedule swung step
+	-- Plays even-numbered steps, 2, 4, 6 etc.
 	clock.run(
 		function()
 			-- I don't know if it's good practice to exploit this
@@ -439,10 +511,10 @@ function PatternGenerator.resetCounters()
 	PatternGenerator.barCounter = 1
 	PatternGenerator.masterStepCounter = 1
 
-end
+end -- End PatternGenerator.resetCounters()
 
 --------------------------------------------------
--- Send All-Notes --------------------------------
+-- Send All-Notes Off ----------------------------
 --------------------------------------------------
 
 function PatternGenerator.allNotesOff()
@@ -451,6 +523,17 @@ function PatternGenerator.allNotesOff()
 	output.allNotesOff()
 
 end -- End PatternGenerator.allNotesOff()
+
+function PatternGenerator.handleK3Button(direction)
+
+	-- Check key up/down
+	if (direction == 1) then
+		k3_functions[PatternGenerator.k3Assign]:keydown()
+	elseif (direction == 2) then
+		k3_functions[PatternGenerator.k3Assign]:keyup()
+	end -- End key up/down check
+
+end -- PatternGenerator.handleK3Button(direction)
 
 --------------------------------------------------
 -- Pattern-Generator Init ------------------------
@@ -547,9 +630,21 @@ function PatternGenerator.init(debug)
 
     quantiser.init(false)
 
+	-- Add Config params -------------------------
+
+	PatternGenerator.addConfigParams()
+
     -- Initialise Output module ------------------
 
     output.init(false)
+
+	-- -- Middy lib by infinitedigits
+	-- -- https://norns.community/authors/infinitedigits/middy
+	-- local middy = include("lib/3rd-party/middy-bline/lib/middy")
+	-- middy:init()
+
+	local middy = include("bline/lib/3rd-party/middy-bline/lib/middy")
+	middy:init()
 
 end -- End PatternGenerator.init()
 

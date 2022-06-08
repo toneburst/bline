@@ -2,11 +2,10 @@
   Bline UI Module
 ]]--
 
-local TabUtil = require "lib.tabutil"
 local UILib = require "ui"
 local NornsUtils = require "lib.util"
-local Graph = require "lib.graph"
 
+-- Splashscreen-playing flag
 local splash_playing = true
 
 -- Params data for pages
@@ -201,7 +200,7 @@ local function drawTitleBar()
 	-- Draw Title
 	screen.level(0)
 	screen.move(2,6)
-	screen.text("bline")
+	screen.text("bLINE")
 	screen.fill()
 
 	-- Draw bpm
@@ -411,6 +410,7 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 	local pattern = pattern_data["pattern"]
 	local step_index = pattern_data["step_index"]
 	local pattern_index_offset = pattern_data["pattern_offset"]
+	local pattern_length = pattern_data["pattern_length"]
 
 	-- Bar dimensions
 	local bar_width = bar_width
@@ -426,8 +426,11 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 	local bar_x_incr = bar_width + bar_spacing
 
 	-- Bar shades
+	local bar_body_dim = 1
 	local bar_body = 3
 	local bar_body_highlight = 5
+
+	local bar_top_dim = 3
 	local bar_top = 6
 	local bar_top_highlight = 15
 
@@ -454,6 +457,7 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 
 		-- Get value
 		-- Offset value lookup index based on channel offset (with wrapping)
+		-- This is to give visual feedback when pattern offsets are changed.
 		local v = pattern[NornsUtils.wrap(i + pattern_index_offset, 1, 16)]
 
 		-- Convert bool to int if pattern type is "bool"
@@ -471,9 +475,13 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 		local top = bar_top
 
 		-- Highlight current step bar
-		if((step_index - pattern_index_offset) == i) then
+		if((NornsUtils.wrap(step_index - pattern_index_offset, 1, 16)) == i) then
 			top = bar_top_highlight
 			body = bar_body_highlight
+		elseif(i > pattern_length) then
+			-- Dim steps beyond pattern length
+			top = bar_top_dim
+			body = bar_body_dim
 		end
 
 		-- Draw bar top
