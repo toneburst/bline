@@ -168,7 +168,7 @@ function sequencer_clock()
         -- Check 'RUNNING' flag
 		if (RUNNING == false) then
 			-- Send reset signal to pattern-generator if 'RUNNING' flag set false
-        	pattern_generator.resetCounters()
+        	-- pattern_generator.resetCounters()
 			pattern_generator.allNotesOff()
 		else
 			-- Else send signal to pattern-generator to execute step
@@ -218,6 +218,7 @@ end
 -- Transport-stop callback
 function clock.transport.stop()
 	print("clock.transport.stop received")
+	pattern_generator.resetCounters()
     RUNNING = false
 end
 
@@ -256,8 +257,8 @@ end
 function cleanup()
     -- Cancel clocks
     clock.cancel(sequencer_clock_id) -- Destoy master clock  via the id we noted
-    clock.cancel(screen_redraw_clock_id) -- Destroy redraw clock via the id we noted
-    clock.cancel(autosave_clock_id) -- Destroy autosave clock via the id we noted
+    clock.cancel(screen_redraw_clock_id)
+    clock.cancel(autosave_clock_id)
     -- Silence output devices
     pattern_generator.allNotesOff()
     -- Save params

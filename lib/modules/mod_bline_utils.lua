@@ -43,13 +43,13 @@ tab = {
 ...return a table containing the values of the key "thekey" for each item
 ]]--
 
-function Bline_Utils.getKeyVals(tabl, key)
+function Bline_Utils.getKeyVals(tab, key)
 
 	-- Declare empty table for items
 	local items = {}
 
 	-- Loop through indexed items in table
-	for i, item in ipairs(tabl) do
+	for i, item in ipairs(tab) do
 		table.insert(items, item[key])
 	end
 	return items

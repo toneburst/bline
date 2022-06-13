@@ -115,9 +115,6 @@ end -- End Middy:init_map(filename)
 
 function Middy:process(data)
     local d = midi.to_msg(data)
-    if d.type == "note_on" or d.type == "note_off" then
-        return self:process_note(d)
-    end
 
     --print('Middy', d.type, d.cc, d.val)
     if not self.file_loaded then
@@ -167,8 +164,9 @@ function Middy:process(data)
                 end
                 if send_val ~= nil and send_val ~= self.events[i].state[j].last_val then
                     --print("Middy", e.comment, o.msg, send_val)
-                    osc.send({"localhost", 10111}, o.msg, {send_val})
-                    self.events[i].last_msg_time = current_time
+                    --osc.send({"localhost", 10111}, o.msg, {send_val})
+					params:set(o.msg, send_val)
+					self.events[i].last_msg_time = current_time
                     self.events[i].state[j].last_val = send_val
                 end
             end

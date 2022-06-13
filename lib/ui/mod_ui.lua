@@ -8,6 +8,9 @@ local NornsUtils = require "lib.util"
 -- Splashscreen-playing flag
 local splash_playing = true
 
+-- Splashscreen animation frames table
+local loading_anim_frames = include("lib/ui/loading_anim")
+
 -- Params data for pages
 local page_params = {
 	-- Page 1
@@ -35,7 +38,7 @@ local page_params = {
 			{param = "pgen_y", label = "y", longLabel = "y-position", val = function() return params:get("pgen_y"); end, longVal = nil}
 		}, {
 			{param = "pgen_loop_length", label = "rst", longLabel = "reset bars", val = function()
-					local opts = {0.5, 1, 2, 4, 6, 16}
+					local opts = {0.5, 1, 2, 4, 8, 16}
 					return opts[params:get("pgen_loop_length")]
 				end
 			},
@@ -124,6 +127,9 @@ local page_params = {
 		pageName = "quantiser"
 	}
 }
+
+-- Timer clock for modal dialog (not implemented)
+--local modal_timer = nil
 
 local UI = {}
 
@@ -289,9 +295,9 @@ end -- End drawPageTitle(str)
 -- Draw Param Modal ----------------------
 ------------------------------------------
 
-local function drawParamModal()
-
-end -- End drawParamModal()
+-- local function drawParamModal()
+--
+-- end -- End drawParamModal()
 
 ------------------------------------------
 -- Draw Page Frame -----------------------
@@ -552,12 +558,16 @@ end
 
 function UI.playSplash()
 
-	-- Set timer for 5 seconds
-	clock.run(function()
-			clock.sleep(5)
-			splash_playing = false
-		end
-	)
+	-- Loop through animation frames
+	for i, path in ipairs(loading_anim_frames) do
+		-- Display png
+		screen.display_png(path, 0, 0)
+		screen.update()
+		-- Pause 1/12 second
+		clock.sleep(1 / 12)
+    end
+
+	splash_playing = false
 
 end -- End UI.playSplash()
 
