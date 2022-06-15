@@ -16,7 +16,7 @@ Engine_Bline_Synth : CroneEngine {
 	var mod = 2;
 	var accent = 0.75;
 	var slideTime = 0.2;
-	var accentDecay = 0.2;
+	var accentDecay = 0.4;
 	var accThreshold = 0.9;
 	var dist = 0;
 	var amp = 0.5;
@@ -48,7 +48,7 @@ Engine_Bline_Synth : CroneEngine {
 			waveform = 0, subLvl = 0,
 			ffreq = 250, ffreqMod = 2, ffreqDcy = 20, fRes = 0.75, fDist = 0,
 			ampAtk = 0.001, ampRel = 0.1,
-			accent = 0.75, accThreshold = 0.9, accAmp = 1.1, accFfreqMod = 1.0, accDcy = 0.2,
+			accent = 0.75, accThreshold = 0.9, accAmp = 1.0, accFfreqMod = 3.0, accDcy = 0.3,
 			dist = 0|
 
 			// Declare vars
@@ -79,7 +79,7 @@ Engine_Bline_Synth : CroneEngine {
 					attackTime: ampAtk,
 					releaseTime: Select.kr(accentSwitch, [ffreqDcy, accDcy]),
 					level: 1.0,
-					curve: -4.0
+					curve: -5.0
 				), gate, doneAction: 0);
 
 			// Calculate filter cutoff env mod unaccented/accented
@@ -87,13 +87,13 @@ Engine_Bline_Synth : CroneEngine {
 
 			// Calculate final filter cutoff
 			finalCutoff = ffreq + (ffreq * (vcfEnv * cutoffModAmt));
-			finalCutoff = finalCutoff.clip(50, 5000);
+			finalCutoff = finalCutoff.clip(80, 5500);
 
 			// Amp unaccented/accented (add VCF envelope to AMP env)
 			finalAmp = (ampEnv + ((vcfEnv * accAmp) * accentSwitch)) * amp;
 
 			// Filter oscillator
-			sig = RLPFD.ar(sig, finalCutoff, fRes, fDist, mul:3.0);
+			sig = RLPFD.ar(sig, finalCutoff, fRes, fDist, mul:1.0);
 
 			// Distortion
 			sig = (sig * linlin(dist, 0, 1, 1, 30)).distort * XFade2.kr(1, 0.2, dist);
@@ -161,32 +161,32 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("cutoff", "f", { arg msg;
-			cutoff = msg[1].linlin(0, 127, 80, 2000);
+			cutoff = msg[1].linexp(0, 127, 70, 2000);
 			bline.set(\ffreq, cutoff);
 		});
 
 		this.addCommand("resonance", "f", { arg msg;
-			resonance = msg[1].linlin(0, 127, 0, 0.8);
+			resonance = msg[1].linlin(0, 127, 0, 0.7;
 			bline.set(\fRes, resonance);
 		});
 
 		this.addCommand("filter_overdrive", "f", { arg msg;
-			filterDist = msg[1].linlin(0, 127, 0, 1);
+			filterDist = msg[1].linlin(0, 127, 0, 4);
 			bline.set(\fDist, filterDist);
 		});
 
 		this.addCommand("envelope", "f", { arg msg;
-			mod = msg[1].linlin(0, 127, 0.1, 2);
+			mod = msg[1].linlin(0, 127, 0.01, 40);
 			bline.set(\ffreqMod, mod);
 		});
 
 		this.addCommand("decay", "f", { arg msg;
-			decay = msg[1].linexp(0, 127, accentDecay, 4);
+			decay = msg[1].linexp(0, 127, accentDecay, 2);
 			bline.set(\ffreqDcy, decay);
 		});
 
 		this.addCommand("accent", "f", { arg msg;
-			accent = msg[1].linlin(0, 127, 0, 1);
+			accent = msg[1].linlin(0, 127, 0, 2);
 			bline.set(\accent, accent);
 		});
 
