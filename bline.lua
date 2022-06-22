@@ -1,15 +1,15 @@
 --
--- bLine
+-- bline
 -- Parametric Acid
 -- Bassline Sculptor
 --
 -- 1.0.0 @toneburst
 --
--- E1 : Change page
+-- E1 : Change parameter page
 -- E2 : Param 1
 -- E3 : Param 2
 -- K2 : Toggle param group
--- K3 : Unassigned
+-- K3 : Assignable
 --
 -- Not all parameters exposed
 -- in the UI. Mapping Params
@@ -58,11 +58,15 @@ local ui = include('lib/ui/mod_ui')
 -- Add shonky 303 engine
 engine.name = "Bline_Synth"
 
+------------------------------------------
+-- GLOBAL VARS ---------------------------
+------------------------------------------
+
 -- Sequencer running flag
-running = true
+RUNNING = true
 
 -- Sequencer eset flag
-reset = false
+RESET = false
 
 -- Screen and pattern dirty flags (global)
 SCREEN_DIRTY = true
@@ -113,13 +117,19 @@ function enc(n, delta)
 	SCREEN_DIRTY = true
 end
 
--------------------------------------------
+------------------------------------------
 -- Norns Buttons -------------------------
 ------------------------------------------
 
 function key(k, z)
 	-- Ignore key-up
 	if (z == 0) then
+		-- We will pass on Key 3 key-up to the pgen rather than the UI module
+		if (k == 3) then
+			-- 2 for direction argument = key-up
+			pattern_generator.handleK3Button(2)
+		end
+		-- Need to return here or we get a key-down event firing after every key-up (dunno why...)
 		return
 	end
 	-- Process key-down (ignore Key 1)
@@ -127,9 +137,9 @@ function key(k, z)
 		-- Key 2 key-down. Pass on to UI module
 		ui.handleButtons(k)
 	elseif (k == 3) then
-		-- We will deal with Key 3 here, rather than passing to the UI module
-		-- Toggle transport on/off (this is a neat one-liner for toggling a boolean!)
-		--running = (not running)
+		-- Pass on Key 3 key-down to pgen module
+		-- 1 for direction argument = key-down
+		pattern_generator.handleK3Button(1)
 		return
 	end
 	-- Set flag to update UI display
@@ -149,16 +159,16 @@ function sequencer_clock()
     while true do
         -- Sync clock to 1/8th note
         clock.sync(1 / 2)
-		-- Send reset signal to pattern-generator if 'reset' flag set
-		if (reset == true) then
+		-- Send reset signal to pattern-generator if 'RESET' flag set
+		if (RESET == true) then
 			pattern_generator.resetCounters()
-			-- Reset 'reset' flag (ha!)
-			reset = false
+			-- RESET 'RESET' flag (ha!)
+			RESET = false
 		end
-        -- Check 'running' flag
-		if (running == false) then
-			-- Send reset signal to pattern-generator if 'running' flag set false
-        	pattern_generator.resetCounters()
+        -- Check 'RUNNING' flag
+		if (RUNNING == false) then
+			-- Send reset signal to pattern-generator if 'RUNNING' flag set false
+        	-- pattern_generator.resetCounters()
 			pattern_generator.allNotesOff()
 		else
 			-- Else send signal to pattern-generator to execute step
@@ -177,7 +187,7 @@ function screen_redraw_clock()
             -- Call redraw() function
             -- Function must be called "redraw()" in order for Norns to disable redraw while System menus active!!
             redraw()
-            -- Reset dirty flag
+            -- RESET dirty flag
             SCREEN_DIRTY = false
         end
     end
@@ -196,37 +206,26 @@ function autosave_clock()
 end
 
 ------------------------------------------
--- Transport functions -------------------
+-- Transport Functions -------------------
 ------------------------------------------
-
-function clock_start()
-	running = true
-end
-
-function clock_stop()
-	running = false
-end
-
-function clock_reset()
-	reset = true
-end
 
 -- Transport-start callback
 function clock.transport.start()
 	print("clock.transport.start received")
-	clock_start()
+	RUNNING = true
 end
 
 -- Transport-stop callback
 function clock.transport.stop()
 	print("clock.transport.stop received")
-    clock_stop()
+	pattern_generator.resetCounters()
+    RUNNING = false
 end
 
 -- Transport-reset callback
 function clock.transport.reset()
 	print("clock.transport.reset received")
-    clock_reset()
+    RESET = true
 end
 
 ------------------------------------------
@@ -258,8 +257,8 @@ end
 function cleanup()
     -- Cancel clocks
     clock.cancel(sequencer_clock_id) -- Destoy master clock  via the id we noted
-    clock.cancel(screen_redraw_clock_id) -- Destroy redraw clock via the id we noted
-    clock.cancel(autosave_clock_id) -- Destroy autosave clock via the id we noted
+    clock.cancel(screen_redraw_clock_id)
+    clock.cancel(autosave_clock_id)
     -- Silence output devices
     pattern_generator.allNotesOff()
     -- Save params

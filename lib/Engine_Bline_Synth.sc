@@ -8,19 +8,19 @@ Engine_Bline_Synth : CroneEngine {
 	// Default Param Values //
 	//////////////////////////
 
-	var waveform = 1;
+	var waveform = 1; // -1 to 1 range
+	var detune = 0;
+	var subLevel = -1; // -1 to 0 range
 	var cutoff = 250;
-	var resonance = 0.5;
-	var filterDist = 0.0;
-	var decay = 2.5;
-	var mod = 2;
+	var resonance = 0.3;
+	var filterDist = 0;
+	var decay = 2;
+	var mod = 0.5;
 	var accent = 0.75;
 	var slideTime = 0.2;
-	var accentDecay = 0.2;
+	var accentDecay = 0.3;
 	var accThreshold = 0.9;
-	var dist = 0;
-	var amp = 0.5;
-	var pan = 0;
+	var dist = -1;  // -1 to 1 range
 
 	// Active notes array
 	var activeFreqs;
@@ -42,33 +42,36 @@ Engine_Bline_Synth : CroneEngine {
         //////////////////
 
 		SynthDef(\bline, { |out = 0,
-			amp = 0.5, pan = 0,
+			amp = 0.8, pan = 0,
 			gate = 0, velocity = 0,
-			freq = 440, freqLagTime = 0.2, freqLagCurve = -2, detune = 0,
-			waveform = 0, subLvl = 0,
-			ffreq = 250, ffreqMod = 2, ffreqDcy = 20, fRes = 0.75, fDist = 0,
-			ampAtk = 0.001, ampRel = 0.1,
-			accent = 0.75, accThreshold = 0.9, accAmp = 1.1, accFfreqMod = 1.0, accDcy = 0.2,
-			dist = 0|
+			freq = 440, freqLagTime = 0, freqLagCurve = -2, detune = 0,
+			waveform = 1, subLvl = -1,
+			ffreq = 250, maxFfreqMod = 4500, ffreqAtk = 0.0001, accFfreqAtk = 0.005, ffreqDcy = 2, ffreqMod = 0.5, fRes = 0.75, fDist = 0,
+			ampAtk = 0.0001, ampDcy = 8.0, ampRel = 0.01,
+			accent = 0.75, accThreshold = 0.9, accAmp = 1.5, accFfreqMod = 500, accDcy = 0.3,
+			dist = -1 |
 
-			// Declare vars
+			// Define vars
 			var sig, freqLagged, accentSwitch, ampEnv, vcfEnv, cutoffModAmt, finalCutoff, finalAmp;
 
 			// Osc freq, with linear lag on legato notes
 			freqLagged = VarLag.kr(freq, freqLagTime, freqLagCurve);
-			//freqLagged = [freqLagged, freqLagged + (freqLagged * detune)];
 
 			// Oscillator mix pulse > saw
-			sig = XFade2.ar(Mix.new(PulseDPW.ar(freqLagged)), Mix.new(SawDPW.ar(freqLagged)), LinLin.ar(waveform, 0.0, 1.0, -1.0, 1.0));
+			sig = XFade2.ar(PulseDPW.ar(freqLagged), SawDPW.ar(freqLagged), waveform);
+
+			// Mix in sub-osc
+			sig = XFade2.ar(sig, PulseDPW.ar(0.5 * freqLagged), subLvl);
 
 			// Accent switch
 			accentSwitch = Select.kr(velocity > accThreshold, [0, 1]);
 
 			// Amp envelope
 			ampEnv = EnvGen.kr(
-				Env.asr(
+				Env.adsr(
 					attackTime: ampAtk,
-					sustainLevel: 1.0,
+					decayTime: ampDcy,
+					sustainLevel: 0.0,
 					releaseTime: ampRel,
 					curve: -4.0
 			), gate, doneAction: 0);
@@ -76,31 +79,32 @@ Engine_Bline_Synth : CroneEngine {
 			// Filter/Amp accent envelope
 			vcfEnv = EnvGen.kr(
 				Env.perc(
-					attackTime: ampAtk,
+					attackTime: Select.kr(accentSwitch, [ffreqAtk, accFfreqAtk]), // Soften VCF env attack on accented notes?
 					releaseTime: Select.kr(accentSwitch, [ffreqDcy, accDcy]),
 					level: 1.0,
 					curve: -4.0
 				), gate, doneAction: 0);
 
 			// Calculate filter cutoff env mod unaccented/accented
-			cutoffModAmt = ffreqMod + ((accFfreqMod * accent) * accentSwitch);
+			cutoffModAmt = (ffreqMod * maxFfreqMod) + (accentSwitch * (accent * accFfreqMod));
 
 			// Calculate final filter cutoff
-			finalCutoff = ffreq + (ffreq * (vcfEnv * cutoffModAmt));
-			finalCutoff = finalCutoff.clip(50, 5000);
+			finalCutoff = ffreq + (vcfEnv * cutoffModAmt);
+			finalCutoff = finalCutoff.clip(50, 4000);
 
 			// Amp unaccented/accented (add VCF envelope to AMP env)
-			finalAmp = (ampEnv + ((vcfEnv * accAmp) * accentSwitch)) * amp;
+			finalAmp = (ampEnv + (accentSwitch * (vcfEnv * accAmp))) * amp;
 
 			// Filter oscillator
-			sig = RLPFD.ar(sig, finalCutoff, fRes, fDist, mul:3.0);
+			sig = RLPFD.ar(sig, finalCutoff, fRes, fDist, mul:1.5);
 
 			// Distortion
-			sig = (sig * linlin(dist, 0, 1, 1, 30)).distort * XFade2.kr(1, 0.2, dist);
+			sig = (sig * linlin(dist, -1, 1, 1, 30)).distort * LinXFade2.kr(1, 0.2, dist);
 
 			// Output
 			Out.ar(out, Pan2.ar(sig, pan, finalAmp));
 		}).add;
+
 
 		// https://llllllll.co/t/supercollider-engine-failure-in-server-error/53051
 		Server.default.sync;
@@ -156,27 +160,27 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("waveform", "f", { arg msg;
-			waveform = msg[1].linlin(0, 127, 0, 1);
+			waveform = msg[1].linlin(0, 127, -1, 1);
 			bline.set(\waveform, waveform);
 		});
 
 		this.addCommand("cutoff", "f", { arg msg;
-			cutoff = msg[1].linlin(0, 127, 80, 2000);
+			cutoff = msg[1].linexp(0, 127, 30, 4000);
 			bline.set(\ffreq, cutoff);
 		});
 
 		this.addCommand("resonance", "f", { arg msg;
-			resonance = msg[1].linlin(0, 127, 0, 0.8);
+			resonance = msg[1].linlin(0, 127, 0.1, 0.8;
 			bline.set(\fRes, resonance);
 		});
 
 		this.addCommand("filter_overdrive", "f", { arg msg;
-			filterDist = msg[1].linlin(0, 127, 0, 1);
+			filterDist = msg[1].linlin(0, 127, 0, 4);
 			bline.set(\fDist, filterDist);
 		});
 
 		this.addCommand("envelope", "f", { arg msg;
-			mod = msg[1].linlin(0, 127, 0.1, 2);
+			mod = msg[1].linlin(0, 127, 0.1, 1);
 			bline.set(\ffreqMod, mod);
 		});
 
@@ -191,7 +195,7 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("distortion", "f", { arg msg;
-			dist = msg[1].linlin(0, 127, 0, 1);
+			dist = msg[1].linlin(0, 127, -1, 1);
 			bline.set(\dist, dist);
 		});
 
