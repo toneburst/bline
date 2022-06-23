@@ -8,19 +8,35 @@ Engine_Bline_Synth : CroneEngine {
 	// Default Param Values //
 	//////////////////////////
 
-	var waveform = 1; // -1 to 1 range
-	var detune = 0;
-	var subLevel = -1; // -1 to 0 range
-	var cutoff = 250;
-	var resonance = 0.3;
-	var filterDist = 0;
-	var decay = 2;
-	var mod = 0.5;
-	var accent = 0.75;
-	var slideTime = 0.2;
-	var accentDecay = 0.3;
-	var accThreshold = 0.9;
-	var dist = -1;  // -1 to 1 range
+	params = Dictionary.newFrom([
+		\waveform, 1, // -1 to 1 range
+		\detune, 0,
+		\subLevel, -1, // -1 to 0 range
+		\cutoff, 250,
+		\resonance, 0.3,
+		\filterDist, 0,
+		\decay, 2,
+		\mod, 0.5,
+		\accent, 0.75,
+		\slideTime, 0.2,
+		\accDcy, 0.3,
+		\accThreshold, 0.9,
+		\dist, -1  // -1 to 1 range
+	]);
+
+	// var waveform = 1; // -1 to 1 range
+	// var detune = 0;
+	// var subLevel = -1; // -1 to 0 range
+	// var cutoff = 250;
+	// var resonance = 0.3;
+	// var filterDist = 0;
+	// var decay = 2;
+	// var mod = 0.5;
+	// var accent = 0.75;
+	// var slideTime = 0.2;
+	// var accentDecay = 0.3;
+	// var accThreshold = 0.9;
+	// var dist = -1;  // -1 to 1 range
 
 	// Active notes array
 	var activeFreqs;
@@ -109,21 +125,8 @@ Engine_Bline_Synth : CroneEngine {
 		// https://llllllll.co/t/supercollider-engine-failure-in-server-error/53051
 		Server.default.sync;
 
-		// Set initial params (may not be needed (use Norns param default values?))
-		bline = Synth(\bline, [
-			\out, 0,
-			\gate, 0,
-			\amp, amp,
-			\waveform, waveform,
-			\ffreq, cutoff,
-			\ffreqDcy, decay,
-			\ffreqMod, mod,
-			\accent, accent,
-			\accDcy, accentDecay,
-			\accThreshold, accThreshold,
-			\freqLagTime, slideTime,
-			\dist, dist],
-		target:pg);
+		bline = Synth(\bline, params.getPairs, target:pg);
+
 
         ///////////////////////
         // Control Interface //
@@ -141,7 +144,7 @@ Engine_Bline_Synth : CroneEngine {
 				bline.set(\gate, 1, \velocity, msg[2]/127, \freqLagTime, 0);
 			} {
 				// Legato note
-				bline.set(\freqLagTime, slideTime);
+				bline.set(\freqLagTime, params.slideTime);
 			};
 			bline.set(\freq, freq);
 			activeFreqs = activeFreqs.add(freq);
@@ -160,58 +163,58 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("waveform", "f", { arg msg;
-			waveform = msg[1].linlin(0, 127, -1, 1);
-			bline.set(\waveform, waveform);
+			params.waveform = msg[1].linlin(0, 127, -1, 1);
+			bline.set(\waveform, params.waveform);
 		});
 
 		this.addCommand("cutoff", "f", { arg msg;
-			cutoff = msg[1].linexp(0, 127, 30, 4000);
-			bline.set(\ffreq, cutoff);
+			params.cutoff = msg[1].linexp(0, 127, 30, 4000);
+			bline.set(\ffreq, params.cutoff);
 		});
 
 		this.addCommand("resonance", "f", { arg msg;
-			resonance = msg[1].linlin(0, 127, 0.1, 0.8;
-			bline.set(\fRes, resonance);
+			params.resonance = msg[1].linlin(0, 127, 0.1, 0.8;
+			bline.set(\fRes, params.resonance);
 		});
 
 		this.addCommand("filter_overdrive", "f", { arg msg;
-			filterDist = msg[1].linlin(0, 127, 0, 4);
-			bline.set(\fDist, filterDist);
+			params.filterDist = msg[1].linlin(0, 127, 0, 4);
+			bline.set(\fDist, params.filterDist);
 		});
 
 		this.addCommand("envelope", "f", { arg msg;
-			mod = msg[1].linlin(0, 127, 0.1, 1);
-			bline.set(\ffreqMod, mod);
+			params.mod = msg[1].linlin(0, 127, 0.1, 1);
+			bline.set(\ffreqMod, params.mod);
 		});
 
 		this.addCommand("decay", "f", { arg msg;
-			decay = msg[1].linexp(0, 127, accentDecay, 4);
-			bline.set(\ffreqDcy, decay);
+			params.decay = msg[1].linexp(0, 127, params.accentDecay, 4);
+			bline.set(\ffreqDcy, params.decay);
 		});
 
 		this.addCommand("accent", "f", { arg msg;
-			accent = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\accent, accent);
+			params.accent = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\accent, params.accent);
 		});
 
 		this.addCommand("distortion", "f", { arg msg;
-			dist = msg[1].linlin(0, 127, -1, 1);
-			bline.set(\dist, dist);
+			params.dist = msg[1].linlin(0, 127, -1, 1);
+			bline.set(\dist, params.dist);
 		});
 
 		this.addCommand("slide_time", "f", { arg msg;
-			slideTime = msg[1]; // No interpolation!
-			bline.set(\freqLagTime, slideTime);
+			params.slideTime = msg[1]; // No interpolation!
+			bline.set(\freqLagTime, params.slideTime);
 		});
 
 		this.addCommand("volume", "f", { arg msg;
-			slideTime = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\amp, amp);
+			params.amp = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\amp, params.amp);
 		});
 
 		this.addCommand("pan", "f", { arg msg;
-			pan = msg[1].linlin(0, 127, -1, 1);
-			bline.set(\pan, pan);
+			params.pan = msg[1].linlin(0, 127, -1, 1);
+			bline.set(\pan, params.pan);
 		});
 
 	} // end alloc
