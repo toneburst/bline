@@ -1,4 +1,4 @@
-![bline](https://github.com/toneburst/bline/blob/main/screenshots/bLINE_Logo_GIF.gif)
+![bline](https://github.com/toneburst/bline/blob/main/screenshots/bLINE_Logo_GIF_02.gif)
 
 A parametric acid bassline sculptor script for Monome Norns.
 
