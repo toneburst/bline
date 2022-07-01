@@ -2,7 +2,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/toneburst/bline)](https://github.com/toneburst/bline/issues)
 [![GitHub stars](https://img.shields.io/github/stars/toneburst/bline)](https://github.com/toneburst/bline/stargazers)
 [![GitHub license](https://img.shields.io/github/license/toneburst/bline)](https://github.com/toneburst/bline)
-[![Twitter](https://img.shields.io/twitter/url?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)
+[![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)
 
 # Bline
 
