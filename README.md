@@ -53,4 +53,32 @@ This is a personal spare-time project, and I'm a hobbyist programmer, so no guar
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 [![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)
 
+```txt
 
+                     H
+                     |
+               H  H  C--H
+                `.|,'|
+                  C  H  H
+                  |     |
+             O    N  H  C
+             \\ ,' `.|,'|`.
+               C     C  H  H
+               |     |
+            H--C     H
+             ,' `.
+      H  H--C  H--C--H
+      |     ||    |
+H     C     C     N  H  H
+ `. ,' `. ,' `. ,' `.|,'
+   C  _  C  H  C     C
+   | (_) |   `.|     |
+   C     C     C     H
+ ,' `. ,' `. ,' `.
+H     C     C     H
+      |    ||
+      N-----C
+      |     |
+      H     H
+
+```
