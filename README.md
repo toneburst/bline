@@ -36,14 +36,14 @@ See wiki for more information.
 
 Roadmap for future development includes
 
-- Additional output modes
-- Updated Quantiser module
-- Assignable functions for K3
-- Momentary pattern-transform FX 
-- Grid support for specific parameters (pattern-lengths, offsets, pattern-transform FX)
-- Arc support for key params
-- Preset system (instant save/recall)
-- MIDI file export
+- [ ] Additional output modes
+- [ ] Updated Quantiser module
+- [ ] Additional assignable functions for K3
+- [ ] Momentary pattern-transform FX 
+- [ ] Grid support for specific parameters (pattern-lengths, offsets, pattern-transform FX)
+- [ ] Arc support for key params
+- [ ] Preset system (instant save/recall)
+- [ ] MIDI file export
 
 This is a personal spare-time project, and I'm a hobbyist programmer, so no guarantees all (or indeed *any*) of these additional features will be implemented.
 
