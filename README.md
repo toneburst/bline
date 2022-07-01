@@ -50,7 +50,7 @@ This is a personal spare-time project, and I'm a hobbyist programmer, so no guar
 [![GitHub forks](https://img.shields.io/github/forks/toneburst/bline)](https://github.com/toneburst/bline/network)
 [![GitHub issues](https://img.shields.io/github/issues/toneburst/bline)](https://github.com/toneburst/bline/issues)
 [![GitHub stars](https://img.shields.io/github/stars/toneburst/bline)](https://github.com/toneburst/bline/stargazers)
-[![GitHub license](https://img.shields.io/github/license/toneburst/bline)](https://github.com/toneburst/bline)
+![GitHub](https://img.shields.io/github/license/toneburst/bline)
 [![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)
 
 
