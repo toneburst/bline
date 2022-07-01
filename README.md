@@ -12,7 +12,7 @@ A parametric acid bassline sculptor script for Monome Norns.
 
 #### Recommended
 
-- MIDI controller with multiple sliders, knobs or encoders for parameter-mapping
+- MIDI controller with multiple sliders, knobs or encoders for parameter-mapping (optimised for Novation Launch Control XL)
 - Hardware or software tb-303 emulator
 - MIDI interface or USB cable to connect to the above
 
