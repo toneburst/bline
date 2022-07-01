@@ -45,4 +45,4 @@ Roadmap for future development includes
 
 This is a personal spare-time project, and I'm a hobbyist programmer, so no guarantees all (or indeed *any*) of these additional features will be implemented.
 
-https://img.shields.io/github/forks/toneburst/bline
+[![GitHub forks](https://img.shields.io/github/forks/toneburst/bline)](https://github.com/toneburst/bline/network)
