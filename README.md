@@ -1,9 +1,3 @@
-[![GitHub forks](https://img.shields.io/github/forks/toneburst/bline)](https://github.com/toneburst/bline/network)
-[![GitHub issues](https://img.shields.io/github/issues/toneburst/bline)](https://github.com/toneburst/bline/issues)
-[![GitHub stars](https://img.shields.io/github/stars/toneburst/bline)](https://github.com/toneburst/bline/stargazers)
-[![GitHub license](https://img.shields.io/github/license/toneburst/bline)](https://github.com/toneburst/bline)
-[![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)
-
 # Bline
 
 A parametric acid bassline sculptor script for Monome Norns.
@@ -36,6 +30,8 @@ Other synths that have a mono-legato mode and allow velocity to modulate note vo
 
 Not all parameters are exposed in the UI display. Mapping Params to MIDI controller recommended!
 
+See wiki for more information.
+
 ## Future Development
 
 Roadmap for future development includes
@@ -50,5 +46,11 @@ Roadmap for future development includes
 - MIDI file export
 
 This is a personal spare-time project, and I'm a hobbyist programmer, so no guarantees all (or indeed *any*) of these additional features will be implemented.
+
+[![GitHub forks](https://img.shields.io/github/forks/toneburst/bline)](https://github.com/toneburst/bline/network)
+[![GitHub issues](https://img.shields.io/github/issues/toneburst/bline)](https://github.com/toneburst/bline/issues)
+[![GitHub stars](https://img.shields.io/github/stars/toneburst/bline)](https://github.com/toneburst/bline/stargazers)
+[![GitHub license](https://img.shields.io/github/license/toneburst/bline)](https://github.com/toneburst/bline)
+[![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Ftoneburst%2Fbline)
 
 
