@@ -10,15 +10,15 @@ A parametric acid bassline sculptor script for Monome Norns.
 
 - Original Norns, Norns Shield or Fates
 
-tb-303 emulator should apply accent to received MIDI notes with a high velocity value (accent threshold adjustable) and slide to overlapping notes ("mono-legato" mode).
-
-Other synths that have a mono-legato mode and allow velocity to modulate note volume and filter envelope modulation amount may also produce interesting results. 
-
 #### Recommended
 
 - MIDI controller with multiple sliders, knobs or encoders for parameter-mapping
 - Hardware or software tb-303 emulator
 - MIDI interface or USB cable to connect to the above
+
+tb-303 emulator should apply accent to received MIDI notes with a high velocity value (accent threshold adjustable) and slide to overlapping notes ("mono-legato" mode).
+
+Other synths that have a mono-legato mode and allow velocity to modulate note volume and filter envelope modulation amount may also produce interesting results. 
 
 ## Quick-Start:
 
