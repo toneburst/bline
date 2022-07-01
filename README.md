@@ -30,21 +30,6 @@ Not all parameters are exposed in the UI display. Mapping Params to MIDI control
 
 See wiki for more information.
 
-## Future Development
-
-Roadmap for future development includes
-
-- [ ] Additional output modes
-- [ ] Updated Quantiser module
-- [ ] Additional assignable functions for K3
-- [ ] Momentary pattern-transform FX 
-- [ ] Grid support for specific parameters (pattern-lengths, offsets, pattern-transform FX)
-- [ ] Arc support for key params
-- [ ] Preset system (instant save/recall)
-- [ ] MIDI file export
-
-This is a personal spare-time project, and I'm a hobbyist programmer, so no guarantees all (or indeed *any*) of these additional features will be implemented.
-
 [![GitHub forks](https://img.shields.io/github/forks/toneburst/bline)](https://github.com/toneburst/bline/network)
 [![GitHub issues](https://img.shields.io/github/issues/toneburst/bline)](https://github.com/toneburst/bline/issues)
 [![GitHub stars](https://img.shields.io/github/stars/toneburst/bline)](https://github.com/toneburst/bline/stargazers)
