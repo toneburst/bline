@@ -24,135 +24,161 @@ function BlineSynth.addParams()
 
 	print("Adding params")
 
-    params:add_group(paramGroupName, 10)
+    params:add_group(paramGroupName, 12)
 
     params:add_control(
 		paramIDPrefix .. "waveform",
 		"Waveform",
-		ControlSpec.new(0, 127, 'lin', 0.1, 127)
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
 		paramIDPrefix .. "waveform",
 		function(x)
 			engine.waveform(x)
-			SCREEN_DIRTY = true
+			--SCREEN_DIRTY = true
+		end
+	)
+
+	params:add_control(
+		paramIDPrefix .. "sub_level",
+		"Sub Level",
+		ControlSpec.new(0, 127, 'lin', 0, 127)
+	)
+	params:set_action(
+		paramIDPrefix .. "sub_level",
+		function(x)
+			engine.sub_level(x)
+			--SCREEN_DIRTY = true
 		end
 	)
 
     params:add_control(
 		paramIDPrefix .. "cutoff",
 		"Filter Cutoff",
-		ControlSpec.new(0, 127, 'lin', 0.01, 64)
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
 		paramIDPrefix .. "cutoff",
 		function(x)
 			engine.cutoff(x)
-			SCREEN_DIRTY = true
+			--SCREEN_DIRTY = true
 		end
 	)
 
     params:add_control(
 		paramIDPrefix .. "resonance",
 		"Filter Resonance",
-		ControlSpec.new(0, 127, 'lin', 0.1, 80)
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
 		paramIDPrefix .. "resonance",
 		function(x)
 			engine.resonance(x)
-			SCREEN_DIRTY = true
+			--SCREEN_DIRTY = true
 		end
 	)
 
     params:add_control(
 		paramIDPrefix .. "filter_overdrive",
 		"Filter Overdrive",
-		ControlSpec.new(0, 127, 'lin', 0.1, 0)
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
 		paramIDPrefix .. "filter_overdrive",
 		function(x)
 			engine.filter_overdrive(x)
-			SCREEN_DIRTY = true
+			--SCREEN_DIRTY = true
 		end
 	)
 
     params:add_control(
 		paramIDPrefix .. "envelope",
 		"Filter Envelope",
-		ControlSpec.new(0, 127, 'lin', 0.1, 100)
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
 		paramIDPrefix .. "envelope",
 		function(x)
 			engine.envelope(x)
-			SCREEN_DIRTY = true
+			--SCREEN_DIRTY = true
 		end
 	)
 
     params:add_control(
 		paramIDPrefix .. "decay",
 		"Envelope Decay",
-		ControlSpec.new(0, 127, 'lin', 0.1, 100)
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
 		paramIDPrefix .. "decay",
 		function(x)
 			engine.decay(x)
-			SCREEN_DIRTY = true
+			--SCREEN_DIRTY = true
 		end
 	)
 
     params:add_control(
 		paramIDPrefix .. "accent",
 		"Accent",
-		ControlSpec.new(0, 127, 'lin', 0.1, 100)
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
 		paramIDPrefix .. "accent",
 		function(x)
 			engine.accent(x)
-			SCREEN_DIRTY = true
+			--SCREEN_DIRTY = true
 		end
 	)
 
     params:add_control(
 		paramIDPrefix .. "slide_time",
 		"Slide Time",
-		ControlSpec.new(0, 1, 'lin', 0.01, 0.15)
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
 		paramIDPrefix .. "slide_time",
 		function(x)
 			engine.slide_time(x)
-			SCREEN_DIRTY = true
+			--SCREEN_DIRTY = true
 		end
 	)
 
-    params:add_control(
-		paramIDPrefix .. "volume",
-		"Volume",
-		ControlSpec.new(0, 127, 'lin', 0.1, 100)
+	params:add_control(
+		paramIDPrefix .. "distortion",
+		"Distortion",
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "volume",
+		paramIDPrefix .. "distortion",
 		function(x)
-			engine.volume(x)
-			SCREEN_DIRTY = true
+			engine.distortion(x)
+			--SCREEN_DIRTY = true
 		end
 	)
 
-    params:add_control(
+	params:add_control(
+		paramIDPrefix .. "amp",
+		"Amp",
+		ControlSpec.new(0, 127, 'lin', 0, 127)
+	)
+    params:set_action(
+		paramIDPrefix .. "amp",
+		function(x)
+			engine.volume(x)
+			--SCREEN_DIRTY = true
+		end
+	)
+
+	params:add_control(
 		paramIDPrefix .. "pan",
 		"Pan",
-		ControlSpec.new(0, 127, 'lin', 0.1, 64)
+		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
 		paramIDPrefix .. "pan",
 		function(x)
-			engine.volume(x)
-			SCREEN_DIRTY = true
+			engine.pan(x)
+			--SCREEN_DIRTY = true
 		end
 	)
 

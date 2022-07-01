@@ -23,6 +23,9 @@ local output = include("lib/modules/mod_output")
 local bline_utils = include("lib/modules/mod_bline_utils")
 --local bline_utils = require(_path.code .. "bline/lib/modules/mod_bline_utils")
 
+-- Require Clockcut module
+local clockcut = include("lib/3rd-party/clockcut/clockcut")
+
 --------------------------------------------------
 -- Local Variables -------------------------------
 --------------------------------------------------
@@ -684,12 +687,17 @@ function PatternGenerator.init(debug)
 
     output.init(false)
 
+	-- Initialise Clockcut delay -----------------
+
+	clockcut.init()
+
 	-- Add Config params -------------------------
 
     PatternGenerator.addConfigParams()
 
     -- Copy PMAP file
 	PatternGenerator.copyPMAP()
+
 
 end -- End PatternGenerator.init()
 
