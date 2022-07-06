@@ -28,7 +28,7 @@ Other synths that have a mono-legato mode and allow velocity to modulate note vo
 
 Not all parameters are exposed in the UI display. Mapping Params to MIDI controller recommended!
 
-If you have a Novation Launch Control XL, plug it in and assign it to controller slot 16.
+If you have a Novation Launch Control XL, plug it in, assign it to Norns MIDI device slot 16 and load factory patch 1 on the controller. You'll find all the key parameters mapped for you.
 
 If you have another MIDI controller, I recommend starting by mapping the following parameters:
 
