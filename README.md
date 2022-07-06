@@ -26,7 +26,23 @@ Other synths that have a mono-legato mode and allow velocity to modulate note vo
 - K2 : Toggle parameter group
 - K3 : Currently unassigned
 
-Not all parameters are exposed in the UI display. Mapping Params to MIDI controller recommended! If you have a Novation Launch Control XL, plug it in and assign it to controller slot 16.
+Not all parameters are exposed in the UI display. Mapping Params to MIDI controller recommended!
+
+If you have a Novation Launch Control XL, plug it in and assign it to controller slot 16.
+
+If you have another MIDI controller, I recommend starting by mapping the following parameters:
+
+* X
+* Y
+* Accent Density
+* Accent Length
+* Accent Offset
+* Slide Density
+* Slide Length
+* Slide Offset
+* Rest Density
+* Rest Length
+* Rest Offset
 
 See wiki for more information.
 
