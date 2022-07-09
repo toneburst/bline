@@ -52,7 +52,7 @@ If you have another MIDI controller, I recommend starting by mapping the followi
 * Rest Length
 * Rest Offset
 
-See wiki for more information.
+See [wiki](https://github.com/toneburst/bline/wiki) for more information.
 
 [![GitHub forks](https://img.shields.io/github/forks/toneburst/bline)](https://github.com/toneburst/bline/network)
 [![GitHub issues](https://img.shields.io/github/issues/toneburst/bline)](https://github.com/toneburst/bline/issues)
