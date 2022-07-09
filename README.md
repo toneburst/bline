@@ -18,6 +18,14 @@ tb-303 emulator should apply accent to received MIDI notes with a high velocity 
 
 Other synths that have a mono-legato mode and allow velocity to modulate note volume and filter envelope modulation amount and/or cutoff may also produce interesting results. 
 
+## Installation
+
+Install from Maiden
+
+`;install https://github.com/toneburst/bline`
+
+Restart Norns to enable engine.
+
 ## Quick-Start:
 
 - E1 : Change parameter page
