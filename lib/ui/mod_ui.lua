@@ -143,7 +143,7 @@ UI.controlIndex = 1
 UI.currentParams = page_params[1]
 
 -- Positions
-UI.pageDrawX = 79
+UI.pageDrawX = 80
 UI.pageDrawY = 12
 
 -- Flags
@@ -417,6 +417,7 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 	local step_index = pattern_data["step_index"]
 	local pattern_index_offset = pattern_data["pattern_offset"]
 	local pattern_length = pattern_data["pattern_length"]
+	local pattern_frozen = pattern_data["pattern_xy_freeze"]
 
 	-- Bar dimensions
 	local bar_width = bar_width
@@ -506,6 +507,13 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 		screen.stroke()
 		screen.fill()
 
+	end
+
+	-- Draw fraaze lock
+	if(pattern_frozen == 1) then
+		screen.display_png("/home/we/dust/code/bline/lib/ui/png/padlock-bright.png", 71, graph_y - 8)
+	else
+		screen.display_png("/home/we/dust/code/bline/lib/ui/png/padlock-dim.png", 71, graph_y - 8)
 	end
 
 end -- End drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre_offset, type)

@@ -45,6 +45,9 @@ RESET = false
 -- Screen and pattern dirty flags (global)
 SCREEN_DIRTY = true
 
+-- Version
+VERSION = "1.0.0"
+
 ------------------------------------------
 -- Init ----------------------------------
 ------------------------------------------

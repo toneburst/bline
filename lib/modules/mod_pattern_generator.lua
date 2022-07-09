@@ -24,7 +24,7 @@ local bline_utils = include("lib/modules/mod_bline_utils")
 --local bline_utils = require(_path.code .. "bline/lib/modules/mod_bline_utils")
 
 -- Require Clockcut module
-local clockcut = include("lib/3rd-party/clockcut/clockcut")
+local delay = include("lib/modules/mod_fx_delay")
 
 --------------------------------------------------
 -- Local Variables -------------------------------
@@ -687,9 +687,9 @@ function PatternGenerator.init(debug)
 
     output.init(false)
 
-	-- Initialise Clockcut delay -----------------
+	-- Initialise SoftCut delay -----------------
 
-	clockcut.init()
+	delay.init()
 
 	-- Add Config params -------------------------
 

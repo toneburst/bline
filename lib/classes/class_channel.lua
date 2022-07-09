@@ -44,7 +44,7 @@ function Channel:new(o)
 	o.patternOffset = 0
 	o.posX = 0
 	o.posY = 0
-	o.freezePosYX = false
+	o.freezePosYX = 0
 	o.posXFrozen = 0
 	o.posYFrozen = 0
 	o.jitterVals = {}
@@ -68,7 +68,7 @@ function Channel:new(o)
 	o.channelState = {
 		pattern_length = 16,
 		pattern_offset = 0,
-		pattern_xy_freeze = false,
+		pattern_xy_freeze = 0,
 		pattern = {},
 		raw_pattern = {},
 		step_index = 1
@@ -253,7 +253,7 @@ function Channel:addCommonParams()
 			self.freezePosYX  = x
 			self.posXFrozen = self.posX
 			self.posYFrozen = self.posY
-			self.channelState["pattern_xy_freeze"] = x
+			self.channelState["pattern_xy_freeze"] = self.freezePosYX
 			SCREEN_DIRTY = true
 		end
 	)
@@ -347,7 +347,7 @@ function Channel:calculatePattern()
 	local pos_x, pos_y = 0
 
 	-- Set position to pgen params or frozen values if option set
-	if (self.freezePosYX == true) then
+	if (self.freezePosYX == 1) then
 		-- Set X and Y to frozen values
 		pos_x = self.posXFrozen
 		pos_y = self.posYFrozen
