@@ -36,7 +36,7 @@ Restart Norns to enable engine.
 
 Not all parameters are exposed in the UI display. Mapping Params to MIDI controller recommended!
 
-If you have a Novation Launch Control XL, plug it in, assign it to Norns MIDI device slot 16 and load factory patch 1 on the controller. You'll find all the key parameters mapped for you.
+If you have a [Novation Launch Control XL](https://novationmusic.com/en/launch/launch-control-xl), plug it in, assign it to Norns MIDI device slot 16 and load factory patch 1 on the controller. You'll find all the key parameters mapped for you.
 
 If you have another MIDI controller, I recommend starting by mapping the following parameters:
 
