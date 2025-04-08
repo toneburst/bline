@@ -1,0 +1,65 @@
+<!--
+Generate Bline Lua pattern nodes for pattern_data.lua file
+-->
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Bline Note Index Shuffler</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+
+			function shuffleArray(array, threshold) {
+				let curId = array.length;
+				// There remain elements to shuffle
+				while (0 !== curId) {
+					// Pick a remaining element
+					let randId = Math.floor(Math.random() * curId);
+					curId -= 1;
+					// Swap it with the current element.
+					let tmp = array[curId];
+					array[curId] = array[randId];
+					array[randId] = tmp;
+				}
+				return array;
+			}
+
+			let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+			let arr2 = [];
+
+			let result = ""
+			let threshold = 0;
+
+			for (var i = 0; i < 10; i++) {
+				result += "{"
+				arr2 = shuffleArray(arr, threshold);
+				threshold += 0.1;
+
+				for (var j = 0; j < 13; j++) {
+					result += arr2[j];
+					if (j != 12)
+						result += ", ";
+				}
+				result += "},<br/>"
+			}
+			$("#result").html(result);
+		});
+	</script>
+	<style media="screen">
+		#result {
+			font-family: monospace;
+			white-space: pre;
+			font-size: 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="result"></div>
+</body>
+
+</html>

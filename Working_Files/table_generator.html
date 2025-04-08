@@ -1,0 +1,121 @@
+<!--
+Generate Bline Lua pattern nodes for pattern_data.lua file.
+Run in browser. Output can be copy-pasted into bline data file.
+-->
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Bline Pattern Node Generator</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			var steps = 16; // Pattern length
+			var nodes = 25; // Node count
+			var precision = 5; // Random number precision
+			var indent = "\t"; // Tab
+
+			var output = ""; // Output string
+
+			// Random number generator, with range and precision args
+			function rnum(range, offset) {
+				return ((Math.random() * range) + offset).toFixed(precision);
+			}
+
+			// Shuffle pattern
+			function shuffle_array(array) {
+				let curId = array.length;
+				// There remain elements to shuffle
+				while (0 !== curId) {
+					// Pick a remaining element
+					let randId = Math.floor(Math.random() * curId);
+					curId -= 1;
+					// Swap it with the current element.
+					let tmp = array[curId];
+					array[curId] = array[randId];
+					array[randId] = tmp;
+				}
+				return array;
+			}
+
+			// Ceate pattern
+			// Ensure values don't cluster and enforce a minimum distance between values
+			function create_pattern() {
+				let range = 1 / steps;
+				let gap = 0.1;
+				let pattern = [];
+				// Create pattern
+				for (var n = 0; n < steps; n++) {
+					pattern[n] = rnum(range * (1 - gap), range * n);
+				}
+				// Shuffle pattern steps
+				return shuffle_array(pattern);
+			}
+
+			// Loop through nodes
+			for (var i = 0; i < nodes; i++) {
+				// Start node string
+				output += "local node_" + String(i + 1).padStart(2, '0') + " = {<br>"
+
+				//////////////////////////
+				// Create node channels //
+				//////////////////////////
+
+				// Create Note/Octave channels
+				// Channel values are created using random 0-1 for each step
+				for (var j = 0; j < 2; j++) {
+					output += indent + "{";
+					for (var k = 0; k < steps; k++) {
+						output += rnum(1, 0);
+						if (k < (steps - 1))
+							output += ",";
+					}
+					// Add line-break
+					if (j < 2)
+						output += "},<br>";
+					else
+						output += "}<br>";
+				}
+
+				// Create Accent/Slide/Rest and Aux channels
+				// Channel values are created in 16 "bands" to prevent clustering of similar values to allow smooth operation of threshold parameter
+				for (var m = 0; m < 4; m++) {
+					// Indent line
+					output += indent + "{";
+					// Create pattern
+					let pattern = create_pattern();
+					// Loop through pattern
+					for (var n = 0; n < pattern.length; n++) {
+						output += pattern[n];
+						if (n < (steps - 1))
+							output += ",";
+					}
+					// Add line-break
+					if (m < 5)
+						output += "},<br>";
+					else
+						output += "}<br>";
+				}
+				// Wrap up node
+				output += "}<br>";
+			}
+			$("#result").html(output);
+		});
+	</script>
+	<style media="screen">
+		#result {
+			font-family: monospace;
+			white-space: pre;
+			font-size: 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="result"></div>
+</body>
+
+</html>

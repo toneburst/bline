@@ -8,23 +8,21 @@ Engine_Bline_Synth : CroneEngine {
 	// Default Param Values //
 	//////////////////////////
 
-	var amp = 0.8;
-	var pan = 0;
-	var waveform = 1;
-	var subLvl = -1;
-	var freqLagTime = 0.2;
-	var fFreq = 250;
-	var fRes = 0.3;
-	var fDist = 0;
-	var fFreqDcy = 2;
-	var fFreqMod = 0.5;
-	var accent = 0.75;
-	var accDcy = 0.3;
-	var accThreshold = 0.9;
-	var dist = -1;
+	var p_waveform    = 0.85;
+	var p_sublevel    = 0.0;
+	var p_cutoff      = 0.229;
+	var p_resonance   = 0.5;
+	var p_envmod      = 0.25;
+	var p_decay       = 0.5;
+	var p_accent      = 0.5;
+	var p_volume      = 0.9;
+	var p_filtermorph = 0.0;
+	var p_filterdrive = 0.0;
+	var p_dist        = 0.0;
+	var p_pan         = 0.0;
 
-	// Active notes array
-	var activeFreqs;
+	// Note-stack list. Will contain MIDI note numbers of all currently-held keys
+	var notestack;
 
 	// Synth instance
 	var bline;
@@ -37,99 +35,69 @@ Engine_Bline_Synth : CroneEngine {
 
 		pg = ParGroup.tail(context.xg);
 
-		activeFreqs = Array.new(10);
+		notestack = List.new();
 
         //////////////////
         // Define Synth //
         //////////////////
 
-		SynthDef("bline", {
-			arg out = 0,
-			amp = 0.8, pan = 0,
-			gate = 0, velocity = 0,
-			freq = 440, freqLagTime = 0, freqLagCurve = -2, detune = 0,
-			waveform = 1, subLvl = -1,
-			fFreq = 250, maxfFreqMod = 4000, fFreqAtk = 0.0001, accfFreqAtk = 0.005, fFreqDcy = 2, fFreqMod = 0.5, fRes = 0.75, fDist = 0,
-			ampAtk = 0.0001, ampDcy = 8.0, ampRel = 0.01,
-			accent = 0.75, accThreshold = 0.9, accAmp = 1.25, accfFreqMod = 750, accDcy = 0.3,
-			dist = -1;
+		SynthDef("Open303Bass", {
+			arg out     = 0,
+			gate        = 0.0,
+			notenum     = 60.0,
+			notevel     = 64.0,
+			waveform    = 0.85,
+			sublevel    = 0.0,
+			cutoff      = 0.229,
+			resonance   = 0.5,
+			envmod      = 0.25,
+			decay       = 0.5,
+			accent      = 0.5,
+			volume      = 0.9,
+			filtermorph = 0.0,
+			filterdrive = 0.0,
+			dist        = 0.0,
+			pan         = 0.0;
 
-			// Define vars
-			var sig, freqLagged, accentSwitch, ampEnv, vcfEnv, cutoffModAmt, finalCutoff, finalAmp;
+			// Declare vars
+			var notealloff = NamedControl.tr(\notealloff);
+			// Create output
+			var sig;
 
-			// Osc freq, with linear lag on legato notes
-			freqLagged = VarLag.kr(freq, freqLagTime, freqLagCurve);
-
-			// Oscillator mix pulse > saw
-			sig = XFade2.ar(PulseDPW.ar(freqLagged), SawDPW.ar(freqLagged), waveform);
-
-			// Mix in sub-osc
-			sig = XFade2.ar(sig, PulseDPW.ar(0.5 * freqLagged), subLvl);
-
-			// Accent switch
-			accentSwitch = Select.kr(velocity > accThreshold, [0, 1]);
-
-			// Amp envelope
-			ampEnv = EnvGen.kr(
-				Env.adsr(
-					attackTime: ampAtk,
-					decayTime: ampDcy,
-					sustainLevel: 0.0,
-					releaseTime: ampRel,
-					curve: -4.0
-			), gate, doneAction: 0);
-
-			// Filter/Amp accent envelope
-			vcfEnv = EnvGen.kr(
-				Env.perc(
-					attackTime: Select.kr(accentSwitch, [fFreqAtk, accfFreqAtk]), // Soften VCF env attack on accented notes?
-					releaseTime: Select.kr(accentSwitch, [fFreqDcy, accDcy]),
-					level: 1.0,
-					curve: -4.0
-				), gate, doneAction: 0);
-
-			// Calculate filter cutoff env mod unaccented/accented
-			cutoffModAmt = (fFreqMod * maxfFreqMod) + (accentSwitch * (accent * accfFreqMod));
-
-			// Calculate final filter cutoff
-			// Envelope contribution
-			finalCutoff = fFreq + (vcfEnv * cutoffModAmt);
-			// Clip cuttoff frequency to min/max (RLPFD filter seems to alias badly over about 4000Hz, unfortunately)
-			finalCutoff = finalCutoff.clip(50, 6000);
-
-			// Amp unaccented/accented (add VCF envelope to AMP env on accented notes)
-			finalAmp = (ampEnv + (accentSwitch * (vcfEnv * accAmp)));
-			// Scale to amp param. Naive resonance volume compensation (seems to work OK though)
-			finalAmp = finalAmp * fRes.linlin(0.1, 0.8, 0.7 * amp, amp);
-
-			// Filter oscillator
-			sig = RLPFD.ar(sig, finalCutoff, fRes, fDist, mul:1.5);
+			// Synth. Requires Open303_SuperCollider extension from:
+			// https://github.com/toneburst/Open303_SuperCollider/tree/main
+			sig = Open303.ar(
+				gate, notenum, notevel, notealloff,
+				waveform, cutoff, resonance, envmod, decay, accent, volume,
+				filtermorph, filterdrive
+			);
 
 			// Distortion (with naive volume-compensation)
-			sig = (sig * linexp(dist, -1, 1, 1, 30)).distort * dist.linexp(-1, 1, 1, 0.15);
+			sig = (sig * linexp(dist, 0, 1, 1, 30)).distort * dist.linexp(0, 1, 1, 0.15);
 
-			// Output
-			Out.ar(out, Pan2.ar(sig, pan, finalAmp));
+			// Output output
+			Out.ar(out, Pan2.ar(sig, pan, 1.0));
 		}).add;
-
 
 		// https://llllllll.co/t/supercollider-engine-failure-in-server-error/53051
 		Server.default.sync;
 
-		bline = Synth("bline", target:pg);
+		// Instantiate synth
+		bline = Synth("Open303Bass", target:pg);
 		bline.set(
-			\pan, pan,
-			\waveform, waveform,
-			\subLvl, subLvl,
-			\freqLagTime, freqLagTime,
-			\fFreq, fFreq,
-			\fRes, fRes,
-			\fDist, fDist,
-			\fFreqDcy, fFreqDcy,
-			\fFreqMod, fFreqMod,
-			\accent, accent,
-			\accDcy, accDcy,
-			\accThreshold, accThreshold
+			\gate,        0,
+			\waveform,    p_waveform,
+			\sublevel,    p_waveform,
+			\cutoff,      p_cutoff,
+			\resonance,   p_resonance,
+			\envmod,      p_envmod,
+			\decay,       p_decay,
+			\accent,      p_accent,
+			\volume ,     p_volume,
+			\filtermorph, p_filtermorph,
+			\filterdrive, p_filterdrive,
+			\dist,        p_dist,
+			\pan,         p_pan
 		);
 
         ///////////////////////
@@ -137,93 +105,95 @@ Engine_Bline_Synth : CroneEngine {
         ///////////////////////
 
 		this.addCommand("all_notes_off", "i", { arg msg;
-			activeFreqs = [];
-			bline.set(\gate, 0);
+			notestack = [];
+			//bline.set(\notealloff, 1);
 		});
 
 		this.addCommand("note_on", "ii", { arg msg;
-			var freq = msg[1].midicps;
-			if(activeFreqs.isEmpty) {
-				// Non-Legato note
-				bline.set(\gate, 1, \velocity, msg[2]/127, \freqLagTime, 0);
+			// Add new note to note-stack
+			notestack.add(msg[1]);
+			// Set synth gate high, update note number and velocity
+			bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
+			if (notestack.size == 1) {
+				postf("SCLANG NOTEON % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
 			} {
-				// Legato note
-				bline.set(\freqLagTime, freqLagTime);
-			};
-			bline.set(\freq, freq);
-			activeFreqs = activeFreqs.add(freq);
+				postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
+			}
 		});
 
 		this.addCommand("note_off", "i", { arg msg;
-			var freq = msg[1].midicps;
-			activeFreqs.remove(freq);
-			if(activeFreqs.isEmpty) {
-				// Non-legato release
-				bline.set(\freq, freq, \gate, 0);
+			// Seach for note index in note-stack and remove
+			notestack.do({ arg item, i; if (item == msg[1]) { notestack.removeAt(i); }});
+			// Check if this we've just released the last held note
+			if (notestack.size == 0) {
+				// ...we have. Pull gate low and send note index to synth (velocity not required). Synth will release note
+				postf("SCLANG LAST NOTE OFF % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
+				bline.set(\gate, 0.0, \notenum, msg[1]);
 			} {
-				// Legato release
-				bline.set(\freq, activeFreqs.last);
-			};
+				// Notes still held. Update synth with most recent note index remaining in note-stack. Synth will slide back to note
+				postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", notestack.last, notestack.size, notestack);
+				bline.set(\gate, 1.0, \notenum, notestack.last);
+			}
 		});
 
 		this.addCommand("waveform", "f", { arg msg;
-			waveform = msg[1].linlin(0, 127, -1, 1);
-			bline.set(\waveform, waveform);
+			p_waveform = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\waveform, p_waveform);
 		});
 
 		this.addCommand("sub_level", "f", { arg msg;
-			subLvl = msg[1].linlin(0, 127, -1, -0.75);
-			bline.set(\subLvl, subLvl);
+			p_sublevel = msg[1].linlin(0, 127, -1, -0.75);
+			//bline.set(\sublevel, p_sublevel);
 		});
 
 		this.addCommand("cutoff", "f", { arg msg;
-			fFreq = msg[1].linexp(0, 127, 30, 4000);
-			bline.set(\fFreq, fFreq);
+			p_cutoff = msg[1].linexp(0, 127, 0, 1);
+			bline.set(\cutoff, p_cutoff);
 		});
 
 		this.addCommand("resonance", "f", { arg msg;
-			fRes = msg[1].linlin(0, 127, 0.1, 0.8);
-			bline.set(\fRes, fRes);
+			p_resonance = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\resonance, p_resonance);
 		});
 
 		this.addCommand("filter_overdrive", "f", { arg msg;
-			fDist = msg[1].linlin(0, 127, 0, 4);
-			bline.set(\fDist, fDist);
+			p_filterdrive = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\filterdrive, p_filterdrive);
 		});
 
 		this.addCommand("envelope", "f", { arg msg;
-			fFreqMod = msg[1].linexp(0, 127, 0.1, 1);
-			bline.set(\fFreqMod, fFreqMod);
+			p_envmod = msg[1].linexp(0, 127, 0, 1);
+			bline.set(\envmod, p_envmod);
 		});
 
 		this.addCommand("decay", "f", { arg msg;
-			fFreqDcy = msg[1].linexp(0, 127, accDcy, 4);
-			bline.set(\fFreqDcy, fFreqDcy);
+			p_decay = msg[1].linexp(0, 127, 0, 1);
+			bline.set(\decay, p_decay);
 		});
 
 		this.addCommand("accent", "f", { arg msg;
-			accent = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\accent, accent);
+			p_accent = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\accent, p_accent);
 		});
 
 		this.addCommand("distortion", "f", { arg msg;
-			dist = msg[1].linlin(0, 127, -1, 1);
-			bline.set(\dist, dist);
+			p_dist = msg[1].linexp(0, 127, 0, 1);
+			bline.set(\dist, p_dist);
 		});
 
 		this.addCommand("slide_time", "f", { arg msg;
-			freqLagTime = msg[1].linexp(0, 127, 0.1, 5);
-			bline.set(\freqLagTime, freqLagTime);
+			//freqLagTime = msg[1].linexp(0, 127, 0.1, 5);
+			//bline.set(\freqLagTime, freqLagTime);
 		});
 
 		this.addCommand("volume", "f", { arg msg;
-			amp = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\amp, amp);
+			p_volume = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\volume, p_volume);
 		});
 
 		this.addCommand("pan", "f", { arg msg;
-			pan = msg[1].linlin(0, 127, -1, 1);
-			bline.set(\pan, pan);
+			p_pan = msg[1].linlin(0, 127, -1, 1);
+			bline.set(\pan, p_pan);
 		});
 
 	} // end alloc

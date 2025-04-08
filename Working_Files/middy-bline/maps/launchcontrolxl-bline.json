@@ -1,0 +1,177 @@
+[
+	{
+		"comment": "X-Position",
+		"cc": 77,
+		"commands": [
+			{ "bounds": [0.0,4.0], "msg": "/param/pgen_x"}
+		]
+	},
+	{
+		"comment": "Y-Position",
+		"cc": 78,
+		"commands": [
+			{ "bounds": [0.0,4.0], "msg": "/param/pgen_y"}
+		]
+	},
+	{
+		"comment": "Master Jitter Amount",
+		"cc": 50,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/pgen_pos_jitter"}
+		]
+	},
+	{
+		"comment": "Loop Length",
+		"cc": 14,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6], "msg": "/param/pgen_loop_length"}
+		]
+	},
+	{
+		"comment": "Master Offset",
+		"cc": 30,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], "msg": "/param/pgen_master_offset"}
+		]
+	},
+	{
+		"comment": "Note Scale Rotation",
+		"cc": 79,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/quant_note_scale_rotation"}
+		]
+	},
+	{
+		"comment": "Note Channel Length",
+		"cc": 15,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], "msg": "/param/ch_note_length"}
+		]
+	},
+	{
+		"comment": "Note Channel Offset",
+		"cc": 31,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], "msg": "/param/ch_note_offset"}
+		]
+	},
+	{
+		"comment": "Note Channel Jitter Scale",
+		"cc": 51,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/ch_note_jitter_scale"}
+		]
+	},
+	{
+		"comment": "Octave Scale Rotation",
+		"cc": 80,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/quant_oct_scale_rotation"}
+		]
+	},
+	{
+		"comment": "Octave Channel Length",
+		"cc": 16,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], "msg": "/param/ch_octave_length"}
+		]
+	},
+	{
+		"comment": "Octave Channel Offset",
+		"cc": 32,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], "msg": "/param/ch_octave_offset"}
+		]
+	},
+	{
+		"comment": "Octave Channel Jitter Scale",
+		"cc": 52,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/ch_octave_jitter_scale"}
+		]
+	},
+	{
+		"comment": "Accent Channel Density",
+		"cc": 81,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/ch_accent_density"}
+		]
+	},
+	{
+		"comment": "Accent Channel Length",
+		"cc": 17,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], "msg": "/param/ch_accent_length"}
+		]
+	},
+	{
+		"comment": "Accent Channel Offset",
+		"cc": 33,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], "msg": "/param/ch_accent_offset"}
+		]
+	},
+	{
+		"comment": "Accent Channel Jitter Scale",
+		"cc": 53,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/ch_accent_jitter_scale"}
+		]
+	},
+	{
+		"comment": "Slide Channel Density",
+		"cc": 82,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/ch_slide_density"}
+		]
+	},
+	{
+		"comment": "Slide Channel Length",
+		"cc": 18,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], "msg": "/param/ch_slide_length"}
+		]
+	},
+	{
+		"comment": "Slide Channel Offset",
+		"cc": 34,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], "msg": "/param/ch_slide_offset"}
+		]
+	},
+	{
+		"comment": "Slide Channel Jitter Scale",
+		"cc": 54,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/ch_slide_jitter_scale"}
+		]
+	},
+	{
+		"comment": "Rest Channel Density",
+		"cc": 83,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/ch_rest_density"}
+		]
+	},
+	{
+		"comment": "Rest Channel Length",
+		"cc": 19,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], "msg": "/param/ch_rest_length"}
+		]
+	},
+	{
+		"comment": "Rest Channel Offset",
+		"cc": 35,
+		"commands": [
+			{ "datas": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], "msg": "/param/ch_rest_offset"}
+		]
+	},
+	{
+		"comment": "Rest Channel Jitter Scale",
+		"cc": 55,
+		"commands": [
+			{ "bounds": [0.0,1.0], "msg": "/param/ch_rest_jitter_scale"}
+		]
+	},
+]
