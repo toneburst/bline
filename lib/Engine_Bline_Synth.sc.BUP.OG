@@ -2,6 +2,8 @@
 // Crappy 303
 Engine_Bline_Synth : CroneEngine {
 
+	var pg;
+
 	//////////////////////////
 	// Default Param Values //
 	//////////////////////////
@@ -113,7 +115,7 @@ Engine_Bline_Synth : CroneEngine {
 		// https://llllllll.co/t/supercollider-engine-failure-in-server-error/53051
 		Server.default.sync;
 
-		bline = Synth.new("bline");
+		bline = Synth("bline", target:pg);
 		bline.set(
 			\pan, pan,
 			\waveform, waveform,

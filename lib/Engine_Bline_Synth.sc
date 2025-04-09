@@ -1,8 +1,11 @@
 // CroneEngine_Bline
-// Crappy 303
+// 303 Emulaton based on Open303
+// Requires Open303_SuperCollider extension from:
+// https://github.com/toneburst/Open303_SuperCollider
+
 Engine_Bline_Synth : CroneEngine {
 
-	var pg;
+	//var pg;
 
 	//////////////////////////
 	// Default Param Values //
@@ -10,6 +13,7 @@ Engine_Bline_Synth : CroneEngine {
 
 	var p_waveform    = 0.85;
 	var p_sublevel    = 0.0;
+	var p_slidetime   = 0.1;
 	var p_cutoff      = 0.229;
 	var p_resonance   = 0.5;
 	var p_envmod      = 0.25;
@@ -18,7 +22,7 @@ Engine_Bline_Synth : CroneEngine {
 	var p_volume      = 0.9;
 	var p_filtermorph = 0.0;
 	var p_filterdrive = 0.0;
-	var p_dist        = 0.0;
+	var p_dist        = -1.0;
 	var p_pan         = 0.0;
 
 	// Note-stack list. Will contain MIDI note numbers of all currently-held keys
@@ -33,7 +37,7 @@ Engine_Bline_Synth : CroneEngine {
 
 	alloc {
 
-		pg = ParGroup.tail(context.xg);
+		//pg = ParGroup.tail(context.xg);
 
 		notestack = List.new();
 
@@ -42,52 +46,71 @@ Engine_Bline_Synth : CroneEngine {
         //////////////////
 
 		SynthDef("Open303Bass", {
-			arg out     = 0,
+			arg out,
 			gate        = 0.0,
 			notenum     = 60.0,
 			notevel     = 64.0,
 			waveform    = 0.85,
 			sublevel    = 0.0,
+			slidetime   = 0.1,
 			cutoff      = 0.229,
 			resonance   = 0.5,
 			envmod      = 0.25,
 			decay       = 0.5,
 			accent      = 0.5,
-			volume      = 0.9,
+			volume      = 1.0,
 			filtermorph = 0.0,
 			filterdrive = 0.0,
 			dist        = 0.0,
 			pan         = 0.0;
 
-			// Declare vars
+			//////////////////
+			// Declare Vars //
+			//////////////////
+
+			// Output
+			var signal;
+			var signal2;
+			// Trigger for all-notes-off message to plugin
 			var notealloff = NamedControl.tr(\notealloff);
-			// Create output
-			var sig;
+
+			////////////////////
+			// Generate Audio //
+			////////////////////
+
+	
+			// Distortion (with naive volume-compensation)
+			//signal = (signal * linexp(dist, 0, 1, 1, 30)).distort * dist.linexp(0, 1, 1, 0.15);
+
+			// Output output
+			//Out.ar(out, Pan2.ar(signal, pan));
+	
+			// Simple sinewave synth to test SynthDef
+			var env = Env.adsr(0.01, 1.0, 0.75, 0.5).ar(gate: gate);
+			signal = SinOsc.ar(notenum);	
 
 			// Synth. Requires Open303_SuperCollider extension from:
 			// https://github.com/toneburst/Open303_SuperCollider/tree/main
-			sig = Open303.ar(
+			signal2 = Open303.ar(
 				gate, notenum, notevel, notealloff,
 				waveform, cutoff, resonance, envmod, decay, accent, volume,
 				filtermorph, filterdrive
 			);
+			Out.ar(out, Pan2.ar(signal2, pan, 1.0));
 
-			// Distortion (with naive volume-compensation)
-			sig = (sig * linexp(dist, 0, 1, 1, 30)).distort * dist.linexp(0, 1, 1, 0.15);
-
-			// Output output
-			Out.ar(out, Pan2.ar(sig, pan, 1.0));
 		}).add;
 
 		// https://llllllll.co/t/supercollider-engine-failure-in-server-error/53051
 		Server.default.sync;
 
 		// Instantiate synth
-		bline = Synth("Open303Bass", target:pg);
+		//bline = Synth("Open303Bass", target:pg);
+		bline = Synth("Open303Bass");
 		bline.set(
 			\gate,        0,
 			\waveform,    p_waveform,
 			\sublevel,    p_waveform,
+			\slidetime,   p_slidetime,
 			\cutoff,      p_cutoff,
 			\resonance,   p_resonance,
 			\envmod,      p_envmod,
@@ -106,24 +129,30 @@ Engine_Bline_Synth : CroneEngine {
 
 		this.addCommand("all_notes_off", "i", { arg msg;
 			notestack = [];
-			//bline.set(\notealloff, 1);
+			bline.set(\notealloff, 1);
 		});
 
 		this.addCommand("note_on", "ii", { arg msg;
 			// Add new note to note-stack
-			notestack.add(msg[1]);
-			// Set synth gate high, update note number and velocity
-			bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
+			notestack = notestack.add(msg[1]);
+			// If note-stack size is now 1, this is a non-legato note
 			if (notestack.size == 1) {
+				// Switch gate high and update synth MIDI note index and velocity. Synth will play note
 				postf("SCLANG NOTEON % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
+				bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
+				//bline.set(\gate, 1.0, \notenum, msg[1].midicps, \notevel, msg[2]);
 			} {
+				// ...else this is a legato note
+				// Hold gate high and update synth note number and velocity. Synth will slide to new note
 				postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
+				bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
+				//bline.set(\gate, 1.0, \notenum, msg[1].midicps, \notevel, msg[2]);
 			}
 		});
 
 		this.addCommand("note_off", "i", { arg msg;
 			// Seach for note index in note-stack and remove
-			notestack.do({ arg item, i; if (item == msg[1]) { notestack.removeAt(i); }});
+			notestack = notestack.do({ arg item, i; if (item == msg[1]) { notestack.removeAt(i); }});
 			// Check if this we've just released the last held note
 			if (notestack.size == 0) {
 				// ...we have. Pull gate low and send note index to synth (velocity not required). Synth will release note
@@ -133,6 +162,7 @@ Engine_Bline_Synth : CroneEngine {
 				// Notes still held. Update synth with most recent note index remaining in note-stack. Synth will slide back to note
 				postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", notestack.last, notestack.size, notestack);
 				bline.set(\gate, 1.0, \notenum, notestack.last);
+				//bline.set(\gate, 1.0, \notenum, (notestack.last).midicps);
 			}
 		});
 
@@ -176,14 +206,19 @@ Engine_Bline_Synth : CroneEngine {
 			bline.set(\accent, p_accent);
 		});
 
+		this.addCommand("filter_morph", "f", { arg msg;
+			p_filtermorph = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\filtermorph, p_filtermorph);
+		});
+
 		this.addCommand("distortion", "f", { arg msg;
-			p_dist = msg[1].linexp(0, 127, 0, 1);
+			p_dist = msg[1].linexp(0, 127, -1, 1);
 			bline.set(\dist, p_dist);
 		});
 
 		this.addCommand("slide_time", "f", { arg msg;
-			//freqLagTime = msg[1].linexp(0, 127, 0.1, 5);
-			//bline.set(\freqLagTime, freqLagTime);
+			p_slidetime = msg[1].linexp(0, 127, 0, 1);
+			bline.set(\slidetime, p_slidetime);
 		});
 
 		this.addCommand("volume", "f", { arg msg;
