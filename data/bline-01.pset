@@ -1,83 +1,100 @@
-"rev_eng_input": -22.0
-"rev_cut_input": -inf
-"rev_monitor_input": -6.0823996531186
+"LEVELS": 9
+"REVERB": 11
+"rev_eng_input": -17.262941870071
+"rev_cut_input": -17.262941870071
+"rev_monitor_input": -inf
 "rev_tape_input": -inf
 "rev_return_level": -9.6432746655329e-16
-"rev_pre_delay": 36.0
-"rev_lf_fc": 432.22671005672
-"rev_low_time": 5.046
-"rev_mid_time": 5.523
-"rev_hf_damping": 4938.1363563099
-"comp_mix": 0.85
-"comp_ratio": 6.66
-"comp_threshold": -23.010987440258
-"comp_attack": 4.8977881936845
-"comp_release": 19.009469816028
+"rev_pre_delay": 60.0
+"rev_lf_fc": 200.0
+"rev_low_time": 6.0
+"rev_mid_time": 6.0
+"rev_hf_damping": 3393.6318592721
+"COMPRESSOR": 8
+"comp_mix": 1
+"comp_ratio": 4.0
+"comp_threshold": -18.0
+"comp_attack": 5.0
+"comp_release": 50.0
 "comp_pre_gain": 0.0
-"comp_post_gain": 9.0000000000003
-"cut_input_adc": -9.6432746655329e-16
-"cut_input_eng": -9.6432746655329e-16
-"cut_input_tape": -9.6432746655329e-16
+"comp_post_gain": 9.0
+"SOFTCUT": 3
+"cut_input_adc": -inf
+"cut_input_eng": -inf
+"cut_input_tape": -inf
+"CLOCK": 29
+"Bline Global": 8
 "pgen_x": 0.0
 "pgen_y": 0.0
 "pgen_pos_jitter": 0.0
 "pgen_swap_channels": 0
 "pgen_gate_length": 0.5
-"pgen_loop_length": 2
+"pgen_loop_length": 3
 "pgen_master_offset": 0
-"pgen_clock_swing": 0
+"pgen_clock_swing": 10
+"Bline Note": 4
 "ch_note_length": 16
 "ch_note_offset": 0
 "ch_note_jitter_scale": 1.0
 "ch_note_freeze_pos": 0
+"Bline Octave": 4
 "ch_octave_length": 16
 "ch_octave_offset": 0
 "ch_octave_jitter_scale": 1.0
 "ch_octave_freeze_pos": 0
+"Bline Accent": 5
 "ch_accent_density": 0.5
 "ch_accent_length": 16
 "ch_accent_offset": 0
 "ch_accent_jitter_scale": 1.0
 "ch_accent_freeze_pos": 0
+"Bline Slide": 5
 "ch_slide_density": 0.5
 "ch_slide_length": 16
 "ch_slide_offset": 0
 "ch_slide_jitter_scale": 1.0
 "ch_slide_freeze_pos": 0
-"ch_rest_density": 0.0
+"Bline Rest": 5
+"ch_rest_density": 0.06
 "ch_rest_length": 16
-"ch_rest_offset": 3
-"ch_rest_jitter_scale": 0.0
+"ch_rest_offset": 0
+"ch_rest_jitter_scale": 1.0
 "ch_rest_freeze_pos": 0
-"quant_scale": 10
+"Bline Quantiser": 7
+"quant_scale": 1
 "quant_note_shuffled_indices": 1
 "quant_note_scale_rotation": 0.0
 "quant_oct_scale_rotation": 0.0
 "quant_preserve_root": 2
 "quant_root": 7
 "quant_octave": 2
+"Bline Output": 1
 "output_device": 1
-"output_bline_synth_waveform": 127
+"Bline Synth": 12
+"output_bline_synth_waveform": 0
 "output_bline_synth_sub_level": 0
-"output_bline_synth_cutoff": 69
-"output_bline_synth_resonance": 100
-"output_bline_synth_filter_overdrive": 0
-"output_bline_synth_envelope": 80
-"output_bline_synth_decay": 110
-"output_bline_synth_accent": 80
-"output_bline_synth_slide_time": 64
+"output_bline_synth_cutoff": 0
+"output_bline_synth_resonance": 124.46
+"output_bline_synth_filter_morph": 0
+"output_bline_synth_envelope": 44.45
+"output_bline_synth_decay": 83.82
+"output_bline_synth_accent": 127
+"output_bline_synth_slide_time": 0.68
 "output_bline_synth_distortion": 0
-"output_bline_synth_amp": 100
-"output_bline_synth_pan": 64
-"output_midi_basic_midi_device": 3
+"output_bline_synth_amp": 127
+"output_bline_synth_pan": 63.5
+"MIDI Basic Output": 5
+"output_midi_basic_midi_device": 2
 "output_midi_basic_midi_channel": 1
 "output_midi_basic_na_velocity": 100
 "output_midi_basic_a_velocity": 127
-"delay_level_adc": 0.1
-"delay_level_eng": 0.1
-"delay_time": 9
-"delay_feedback": 0.5
-"config_k3_assign": 1
+"Bline FX": 4
+"delay_level_adc": 1.0
+"delay_level_eng": 0.08
+"delay_time": 7
+"delay_feedback": 0.25
+"Bline Configuration": 6
+"config_k3_assign": 3
 "config_clear_pmap": 0
 "config_restore_pmap": 0
-"config_message": Please reload script
+"config_message": 
