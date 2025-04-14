@@ -80,7 +80,7 @@ Engine_Bline_Synth : CroneEngine {
 
 	
 			// Distortion (with naive volume-compensation)
-			//signal = (signal * linexp(dist, 0, 1, 1, 30)).distort * dist.linexp(0, 1, 1, 0.15);
+			//signal = (signal * linexp(dist, 0, 1, 1, 30)).distort * dist.linlin(0, 1, 1, 0.15);
 
 			// Output output
 			//Out.ar(out, Pan2.ar(signal, pan));
@@ -138,15 +138,13 @@ Engine_Bline_Synth : CroneEngine {
 			// If note-stack size is now 1, this is a non-legato note
 			if (notestack.size == 1) {
 				// Switch gate high and update synth MIDI note index and velocity. Synth will play note
-				postf("SCLANG NOTEON % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
+				//postf("SCLANG NOTEON % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
 				bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
-				//bline.set(\gate, 1.0, \notenum, msg[1].midicps, \notevel, msg[2]);
 			} {
 				// ...else this is a legato note
 				// Hold gate high and update synth note number and velocity. Synth will slide to new note
-				postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
+				//postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
 				bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
-				//bline.set(\gate, 1.0, \notenum, msg[1].midicps, \notevel, msg[2]);
 			}
 		});
 
@@ -156,13 +154,12 @@ Engine_Bline_Synth : CroneEngine {
 			// Check if this we've just released the last held note
 			if (notestack.size == 0) {
 				// ...we have. Pull gate low and send note index to synth (velocity not required). Synth will release note
-				postf("SCLANG LAST NOTE OFF % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
+				//postf("SCLANG LAST NOTE OFF % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
 				bline.set(\gate, 0.0, \notenum, msg[1]);
 			} {
 				// Notes still held. Update synth with most recent note index remaining in note-stack. Synth will slide back to note
-				postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", notestack.last, notestack.size, notestack);
+				//postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", notestack.last, notestack.size, notestack);
 				bline.set(\gate, 1.0, \notenum, notestack.last);
-				//bline.set(\gate, 1.0, \notenum, (notestack.last).midicps);
 			}
 		});
 
@@ -177,7 +174,7 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("cutoff", "f", { arg msg;
-			p_cutoff = msg[1].linexp(0, 127, 0, 1);
+			p_cutoff = msg[1].linlin(0, 127, 0, 1);
 			bline.set(\cutoff, p_cutoff);
 		});
 
@@ -192,12 +189,12 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("envelope", "f", { arg msg;
-			p_envmod = msg[1].linexp(0, 127, 0, 1);
+			p_envmod = msg[1].linlin(0, 127, 0, 1);
 			bline.set(\envmod, p_envmod);
 		});
 
 		this.addCommand("decay", "f", { arg msg;
-			p_decay = msg[1].linexp(0, 127, 0, 1);
+			p_decay = msg[1].linlin(0, 127, 0, 1);
 			bline.set(\decay, p_decay);
 		});
 
@@ -212,12 +209,12 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("distortion", "f", { arg msg;
-			p_dist = msg[1].linexp(0, 127, -1, 1);
+			p_dist = msg[1].linlin(0, 127, -1, 1);
 			bline.set(\dist, p_dist);
 		});
 
 		this.addCommand("slide_time", "f", { arg msg;
-			p_slidetime = msg[1].linexp(0, 127, 0, 1);
+			p_slidetime = msg[1].linlin(0, 127, 0, 1);
 			bline.set(\slidetime, p_slidetime);
 		});
 
