@@ -1,6 +1,8 @@
 --[[
 Bline Output Module
 Internal Synth engine
+Requires Open303_SuperCollider plugin
+https://github.com/toneburst/Open303_SuperCollider
 ]]--
 
 local ControlSpec = require 'controlspec'
@@ -39,18 +41,18 @@ function BlineSynth.addParams()
 		end
 	)
 
-	params:add_control(
-		paramIDPrefix .. "sub_level",
-		"Sub Level",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
-	)
-	params:set_action(
-		paramIDPrefix .. "sub_level",
-		function(x)
-			engine.sub_level(x)
-			--SCREEN_DIRTY = true
-		end
-	)
+	-- params:add_control(
+	-- 	paramIDPrefix .. "sub_level",
+	-- 	"Sub Level",
+	-- 	ControlSpec.new(0, 127, 'lin', 0, 127)
+	-- )
+	-- params:set_action(
+	-- 	paramIDPrefix .. "sub_level",
+	-- 	function(x)
+	-- 		engine.sub_level(x)
+	-- 		--SCREEN_DIRTY = true
+	-- 	end
+	-- )
 
     params:add_control(
 		paramIDPrefix .. "cutoff",
@@ -78,18 +80,31 @@ function BlineSynth.addParams()
 		end
 	)
 
-    params:add_control(
-		paramIDPrefix .. "filter_overdrive",
-		"Filter Overdrive",
+	params:add_control(
+		paramIDPrefix .. "filter_morph",
+		"Filter Morph",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "filter_overdrive",
+		paramIDPrefix .. "filter_morph",
 		function(x)
-			engine.filter_overdrive(x)
+			engine.filter_morph(x)
 			--SCREEN_DIRTY = true
 		end
 	)
+
+    -- params:add_control(
+	-- 	paramIDPrefix .. "filter_overdrive",
+	-- 	"Filter Overdrive",
+	-- 	ControlSpec.new(0, 127, 'lin', 0, 127)
+	-- )
+    -- params:set_action(
+	-- 	paramIDPrefix .. "filter_overdrive",
+	-- 	function(x)
+	-- 		engine.filter_overdrive(x)
+	-- 		--SCREEN_DIRTY = true
+	-- 	end
+	-- )
 
     params:add_control(
 		paramIDPrefix .. "envelope",

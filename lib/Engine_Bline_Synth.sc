@@ -69,34 +69,27 @@ Engine_Bline_Synth : CroneEngine {
 			//////////////////
 
 			// Output
-			var signal;
-			var signal2;
 			// Trigger for all-notes-off message to plugin
 			var notealloff = NamedControl.tr(\notealloff);
+			var sig;
 
 			////////////////////
 			// Generate Audio //
 			////////////////////
 
-	
-			// Distortion (with naive volume-compensation)
-			//signal = (signal * linexp(dist, 0, 1, 1, 30)).distort * dist.linlin(0, 1, 1, 0.15);
-
-			// Output output
-			//Out.ar(out, Pan2.ar(signal, pan));
-	
-			// Simple sinewave synth to test SynthDef
-			var env = Env.adsr(0.01, 1.0, 0.75, 0.5).ar(gate: gate);
-			signal = SinOsc.ar(notenum);	
-
 			// Synth. Requires Open303_SuperCollider extension from:
 			// https://github.com/toneburst/Open303_SuperCollider/tree/main
-			signal2 = Open303.ar(
+			sig = Open303.ar(
 				gate, notenum, notevel, notealloff,
 				waveform, cutoff, resonance, envmod, decay, accent, volume,
 				filtermorph, filterdrive
-			);
-			Out.ar(out, Pan2.ar(signal2, pan, 1.0));
+			) * 0.75;
+			
+			// Add distortion
+			sig = (sig * linexp(dist, -1, 1, 1, 30)).distort * dist.linexp(-1, 1, 1, 0.25);
+			
+			// Final output
+			Out.ar(out, Pan2.ar(sig, pan, 1.0));
 
 		}).add;
 
@@ -183,9 +176,9 @@ Engine_Bline_Synth : CroneEngine {
 			bline.set(\resonance, p_resonance);
 		});
 
-		this.addCommand("filter_overdrive", "f", { arg msg;
-			p_filterdrive = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\filterdrive, p_filterdrive);
+		this.addCommand("filter_morph", "f", { arg msg;
+			p_filtermorph = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\filtermorph, p_filtermorph);
 		});
 
 		this.addCommand("envelope", "f", { arg msg;
