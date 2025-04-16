@@ -80,13 +80,39 @@ Engine_Bline_Synth : CroneEngine {
 			// Synth. Requires Open303_SuperCollider extension from:
 			// https://github.com/toneburst/Open303_SuperCollider/tree/main
 			sig = Open303.ar(
-				gate, notenum -12, notevel, notealloff,
-				waveform, cutoff, resonance, envmod, decay, accent, volume,
-				filtermorph, filterdrive
-			) * 0.2;
+				gate:			gate,
+				notenum:		notenum - 12,
+				notevel:		notevel,
+				notealloff:		notealloff,
+				waveform:		waveform,
+				cutoff:			cutoff,
+				resonance:		resonance,
+				envmod:			envmod,
+				decay:			decay,
+				accent:			accent,
+				volume:			volume,
+				filtermorph:	filtermorph,
+				filterdrive:	filterdrive
+			) * 0.8;
 			
-			// Add distortion
+			// Resonance volume-compensation
+			sig = sig * resonance.linexp(1, 0, 1, 0.25);
+			
+			// Add distortion with naive level-compensation
 			sig = (sig * linexp(dist, -1, 1, 1, 30)).distort * dist.linexp(-1, 1, 1, 0.15);
+			
+			// Add Compressor
+			/*sig = Compander.ar(
+				in:				sig,
+				thresh: 		0.1,
+				slopeBelow:		1,
+				slopeAbove:		0.5,
+				clampTime:		0.01,
+				relaxTime:		0.01
+			);*/
+			
+			// Add limiter
+			sig = Limiter.ar(sig, 0.8, 0.01);
 			
 			// Final output
 			Out.ar(out, Pan2.ar(sig, pan, 1.0));
