@@ -16,10 +16,11 @@ Output.outputType = 1
 
 Output.outputFunctions = {}
 Output.outputFunctions[1] = include("lib/modules/mod_output_bline_synth")
-Output.outputFunctions[2] = include("lib/modules/mod_output_midi_basic")
---Output.outputFunctions[3] = include("lib/modules/mod_output_crow_x0x")
---Output.outputFunctions[4] = include("lib/modules/mod_output_midi_cc")
---Output.outputFunctions[5] = include("lib/modules/mod_output_crow_envs")
+Output.outputFunctions[2] = include("lib/modules/mod_output_bline_o303_synth")
+Output.outputFunctions[3] = include("lib/modules/mod_output_midi_basic")
+--Output.outputFunctions[4] = include("lib/modules/mod_output_crow_x0x")
+--Output.outputFunctions[5] = include("lib/modules/mod_output_midi_cc")
+--Output.outputFunctions[6] = include("lib/modules/mod_output_crow_envs")
 
 -- Current output device table
 Output.outputDevice = {}
@@ -28,10 +29,11 @@ Output.outputDevice = Output.outputFunctions[1]
 -- List of output modes
 Output.outputDevices = {}
 Output.outputDevices[1] = "Internal Synth"
-Output.outputDevices[2] = "MIDI Basic"
---Output.outputDevices[3] = "Crow X0X"
---Output.outputDevices[4] = "MIDI + CCs"
---Output.outputDevices[5] = "Crow Envelopes"
+Output.outputDevices[2] = "Internal Open303 Synth"
+Output.outputDevices[3] = "MIDI Basic"
+--Output.outputDevices[4] = "Crow X0X"
+--Output.outputDevices[5] = "MIDI + CCs"
+--Output.outputDevices[6] = "Crow Envelopes"
 
 Output.previousNote = {
 	note = 0,

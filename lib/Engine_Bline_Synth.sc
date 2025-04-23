@@ -81,7 +81,7 @@ Engine_Bline_Synth : CroneEngine {
 			// https://github.com/toneburst/Open303_SuperCollider/tree/main
 			sig = Open303.ar(
 				gate:			gate,
-				notenum:		notenum - 12,
+				notenum:		notenum - 12, // Adjust octave for consistency with OG bline synth
 				notevel:		notevel,
 				notealloff:		notealloff,
 				waveform:		waveform,
@@ -96,7 +96,7 @@ Engine_Bline_Synth : CroneEngine {
 			);
 			
 			// Resonance volume-compensation
-			sig = sig * resonance.linexp(1, 0, 1, 0.25);
+			//sig = sig * resonance.linexp(1, 0, 1, 0.25);
 			
 			// Add distortion with naive level-compensation
 			sig = (sig * linexp(dist, -1, 1, 1, 30)).distort * dist.linexp(-1, 1, 1, 0.15);
@@ -143,14 +143,9 @@ Engine_Bline_Synth : CroneEngine {
 			\pan,         p_pan
 		);
 
-        ///////////////////////
-        // Control Interface //
-        ///////////////////////
-
-		this.addCommand("all_notes_off", "i", { arg msg;
-			notestack = [];
-			bline.set(\notealloff, 1);
-		});
+        /////////////////
+        // Note On/Off //
+        /////////////////
 
 		this.addCommand("note_on", "ii", { arg msg;
 			// Add new note to note-stack
@@ -159,12 +154,12 @@ Engine_Bline_Synth : CroneEngine {
 			if (notestack.size == 1) {
 				// Switch gate high and update synth MIDI note index and velocity. Synth will play note
 				//postf("SCLANG NOTEON % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
-				bline.set(\gate, 1.0, \notenum, msg[1] - 12, \notevel, msg[2] - 5);
+				bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
 			} {
 				// ...else this is a legato note
 				// Hold gate high and update synth note number and velocity. Synth will slide to new note
 				//postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
-				bline.set(\gate, 1.0, \notenum, msg[1] -12, \notevel, msg[2] - 5);
+				bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
 			}
 		});
 
@@ -179,9 +174,18 @@ Engine_Bline_Synth : CroneEngine {
 			} {
 				// Notes still held. Update synth with most recent note index remaining in note-stack. Synth will slide back to note
 				//postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", notestack.last, notestack.size, notestack);
-				bline.set(\gate, 1.0, \notenum, notestack.last - 12);
+				bline.set(\gate, 1.0, \notenum, notestack.last);
 			}
 		});
+
+		this.addCommand("all_notes_off", "i", { arg msg;
+			notestack = [];
+			bline.set(\notealloff, 1);
+		});
+
+		/////////////////////
+		// OG Synth Params //
+		/////////////////////
 
 		this.addCommand("waveform", "f", { arg msg;
 			p_waveform = msg[1].linlin(0, 127, 0, 1);
@@ -244,6 +248,75 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("pan", "f", { arg msg;
+			p_pan = msg[1].linlin(0, 127, -1, 1);
+			bline.set(\pan, p_pan);
+		});
+
+		//////////////////////////
+		// Open303 Synth Params //
+		//////////////////////////
+
+		this.addCommand("o303_waveform", "f", { arg msg;
+			p_waveform = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\waveform, p_waveform);
+		});
+
+		this.addCommand("o303_sub_level", "f", { arg msg;
+			p_sublevel = msg[1].linlin(0, 127, -1, -0.75);
+			//bline.set(\sublevel, p_sublevel);
+		});
+
+		this.addCommand("o303_cutoff", "f", { arg msg;
+			p_cutoff = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\cutoff, p_cutoff);
+		});
+
+		this.addCommand("o303_resonance", "f", { arg msg;
+			p_resonance = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\resonance, p_resonance);
+		});
+
+		this.addCommand("o303_filter_morph", "f", { arg msg;
+			p_filtermorph = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\filtermorph, p_filtermorph);
+		});
+
+		this.addCommand("o303_envelope", "f", { arg msg;
+			p_envmod = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\envmod, p_envmod);
+		});
+
+		this.addCommand("o303_decay", "f", { arg msg;
+			p_decay = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\decay, p_decay);
+		});
+
+		this.addCommand("o303_accent", "f", { arg msg;
+			p_accent = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\accent, p_accent);
+		});
+
+		this.addCommand("o303_filter_morph", "f", { arg msg;
+			p_filtermorph = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\filtermorph, p_filtermorph);
+		});
+
+		this.addCommand("o303_distortion", "f", { arg msg;
+			p_dist = msg[1].linlin(0, 127, -1, 1);
+			bline.set(\dist, p_dist);
+		});
+
+		this.addCommand("o303_slide_time", "f", { arg msg;
+			p_slidetime = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\slidetime, p_slidetime);
+		});
+
+		this.addCommand("o303_volume", "f", { arg msg;
+			p_volume = msg[1].linlin(0, 127, 0, 1);
+			bline.set(\volume, p_volume);
+		});
+
+		this.addCommand("o303_pan", "f", { arg msg;
 			p_pan = msg[1].linlin(0, 127, -1, 1);
 			bline.set(\pan, p_pan);
 		});

@@ -1,26 +1,28 @@
 --[[
 Bline Output Module
-Original internal Synth engine
+Internal Open303-based Synth engine
+Requires Open303_SuperCollider plugin
+https://github.com/toneburst/Open303_SuperCollider
 ]]--
 
 local ControlSpec = require 'controlspec'
 
-local deviceName = "Bline Synth"
+local deviceName = "Bline Open303 Synth"
 -- Parameter group name
-local paramGroupName = "Bline Synth"
+local paramGroupName = "Bline Open303 Synth"
 -- Parameter ID prefix
-paramIDPrefix = "output_bline_synth_"
+paramIDPrefix = "output_bline_open303_synth_"
 
-local BlineSynth = {}
+local BlineSynthO303 = {}
 
 -- Debug mode toggle
-BlineSynth.debugMode = false
+BlineSynthO303.debugMode = false
 
 -------------------------------------------------
 -- Add Params Function --------------------------
 -------------------------------------------------
 
-function BlineSynth.addParams()
+function BlineSynthO303.addParams()
 
 	print("Adding params")
 
@@ -34,7 +36,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "waveform",
 		function(x)
-			engine.waveform(x)
+			engine.o303_waveform(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -47,7 +49,7 @@ function BlineSynth.addParams()
 	-- params:set_action(
 	-- 	paramIDPrefix .. "sub_level",
 	-- 	function(x)
-	-- 		engine.sub_level(x)
+	-- 		engine.o303_sub_level(x)
 	-- 		--SCREEN_DIRTY = true
 	-- 	end
 	-- )
@@ -60,7 +62,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "cutoff",
 		function(x)
-			engine.cutoff(x)
+			engine.o303_cutoff(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -73,7 +75,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "resonance",
 		function(x)
-			engine.resonance(x)
+			engine.o303_resonance(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -86,7 +88,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "filter_morph",
 		function(x)
-			engine.filter_morph(x)
+			engine.o303_filter_morph(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -99,7 +101,7 @@ function BlineSynth.addParams()
     -- params:set_action(
 	-- 	paramIDPrefix .. "filter_overdrive",
 	-- 	function(x)
-	-- 		engine.filter_overdrive(x)
+	-- 		engine.o303_filter_overdrive(x)
 	-- 		--SCREEN_DIRTY = true
 	-- 	end
 	-- )
@@ -112,7 +114,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "envelope",
 		function(x)
-			engine.envelope(x)
+			engine.o303_envelope(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -125,7 +127,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "decay",
 		function(x)
-			engine.decay(x)
+			engine.o303_decay(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -138,7 +140,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "accent",
 		function(x)
-			engine.accent(x)
+			engine.o303_accent(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -151,7 +153,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "slide_time",
 		function(x)
-			engine.slide_time(x)
+			engine.o303_slide_time(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -164,7 +166,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "distortion",
 		function(x)
-			engine.distortion(x)
+			engine.o303_distortion(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -177,7 +179,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "amp",
 		function(x)
-			engine.volume(x)
+			engine.o303_volume(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -190,7 +192,7 @@ function BlineSynth.addParams()
     params:set_action(
 		paramIDPrefix .. "pan",
 		function(x)
-			engine.pan(x)
+			engine.o303_pan(x)
 			--SCREEN_DIRTY = true
 		end
 	)
@@ -201,16 +203,16 @@ function BlineSynth.addParams()
 	-- Rebuild params table
 	_menu.rebuild_params()
 
-end -- End BlineSynth.addParams()
+end -- End BlineSynthO303.addParams()
 
 --------------------------------------------------
 -- Send Note-On ----------------------------------
 --------------------------------------------------
 
-function BlineSynth.noteOn(note, accent, slide, tie)
+function BlineSynthO303.noteOn(note, accent, slide, tie)
 
 	-- Velocity (Accent ON/OFF)
-    local velocity = 100
+    local velocity = 99
     if accent then
         velocity = 127
     end
@@ -218,39 +220,39 @@ function BlineSynth.noteOn(note, accent, slide, tie)
     -- Send note on
     engine.note_on(note, velocity)
 
-end -- End BlineSynth.noteOn(note, velocity)
+end -- End BlineSynthO303.noteOn(note, velocity)
 
 --------------------------------------------------
 -- Schedule Non-Slide Note Off -------------------
 --------------------------------------------------
 
-function BlineSynth.noteOff(note)
+function BlineSynthO303.noteOff(note)
 
     -- Send note-off
     engine.note_off(note)
 
-end -- End BlineSynth.noteOff(note)
+end -- End BlineSynthO303.noteOff(note)
 
 --------------------------------------------------
 -- All Notes Off ---------------------------------
 --------------------------------------------------
 
-function BlineSynth.allNotesOff()
+function BlineSynthO303.allNotesOff()
 
 	engine.all_notes_off(0)
 
-end -- End BlineSynth.allNotesOff()
+end -- End BlineSynthO303.allNotesOff()
 
 --------------------------------------------------
 -- Unload Function -------------------------------
 --------------------------------------------------
 
-function BlineSynth.unload()
+function BlineSynthO303.unload()
 
 	print("Unloading Output module '" .. deviceName .. "'")
 
     -- Reset Synth
-    BlineSynth.allNotesOff()
+    BlineSynthO303.allNotesOff()
 
 	-- Hide param group from menu
 	params:hide(paramGroupName)
@@ -258,13 +260,13 @@ function BlineSynth.unload()
 	-- Rebuild params table
 	_menu.rebuild_params()
 
-end -- End BlineSynth.unload()
+end -- End BlineSynthO303.unload()
 
 --------------------------------------------------
 -- Activate --------------------------------------
 --------------------------------------------------
 
-function BlineSynth.activate()
+function BlineSynthO303.activate()
 
 	print("Activating Output module '" .. deviceName .. "'")
 
@@ -274,31 +276,31 @@ function BlineSynth.activate()
 	-- Rebuild params table
 	_menu.rebuild_params()
 
-end -- End BlineSynth.activate()
+end -- End BlineSynthO303.activate()
 
 --------------------------------------------------
 -- Init Function ---------------------------------
 --------------------------------------------------
 
-function BlineSynth.init(debug)
+function BlineSynthO303.init(debug)
 
 	print("Initialising Output module '" .. deviceName .. "'")
 
 	if (debug == true) then
-		BlineSynth.debugMode = true
+		BlineSynthO303.debugMode = true
 		print("Setting debug mode ON")
 	end -- End set debug
 
 	-- Add params
-    BlineSynth.addParams()
+    BlineSynthO303.addParams()
 
 	-- All-notes-off
-    BlineSynth.allNotesOff()
+    BlineSynthO303.allNotesOff()
 
-end -- End BlineSynth.init()
+end -- End BlineSynthO303.init()
 
 -----------------------------------------
 -- Return Module Table ------------------
 -----------------------------------------
 
-return BlineSynth
+return BlineSynthO303
