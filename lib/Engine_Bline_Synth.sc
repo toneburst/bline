@@ -93,7 +93,7 @@ Engine_Bline_Synth : CroneEngine {
 				volume:			volume,
 				filtermorph:	filtermorph,
 				filterdrive:	filterdrive
-			) * 0.8;
+			);
 			
 			// Resonance volume-compensation
 			sig = sig * resonance.linexp(1, 0, 1, 0.25);
@@ -102,17 +102,18 @@ Engine_Bline_Synth : CroneEngine {
 			sig = (sig * linexp(dist, -1, 1, 1, 30)).distort * dist.linexp(-1, 1, 1, 0.15);
 			
 			// Add Compressor
-			/*sig = Compander.ar(
+			sig = Compander.ar(
 				in:				sig,
-				thresh: 		0.1,
+				control:		sig,
+				thresh:			0.5,
 				slopeBelow:		1,
 				slopeAbove:		0.5,
 				clampTime:		0.01,
 				relaxTime:		0.01
-			);*/
+			);
 			
 			// Add limiter
-			sig = Limiter.ar(sig, 0.8, 0.01);
+			sig = Limiter.ar(sig, 0.9, 0.01);
 			
 			// Final output
 			Out.ar(out, Pan2.ar(sig, pan, 1.0));
