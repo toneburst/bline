@@ -159,12 +159,12 @@ Engine_Bline_Synth : CroneEngine {
 			if (notestack.size == 1) {
 				// Switch gate high and update synth MIDI note index and velocity. Synth will play note
 				//postf("SCLANG NOTEON % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
-				bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
+				bline.set(\gate, 1.0, \notenum, msg[1] - 12, \notevel, msg[2] - 5);
 			} {
 				// ...else this is a legato note
 				// Hold gate high and update synth note number and velocity. Synth will slide to new note
 				//postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", msg[1], notestack.size, notestack);
-				bline.set(\gate, 1.0, \notenum, msg[1], \notevel, msg[2]);
+				bline.set(\gate, 1.0, \notenum, msg[1] -12, \notevel, msg[2] - 5);
 			}
 		});
 
@@ -179,7 +179,7 @@ Engine_Bline_Synth : CroneEngine {
 			} {
 				// Notes still held. Update synth with most recent note index remaining in note-stack. Synth will slide back to note
 				//postf("SCLANG SLIDETO % STACK SIZE % STACK % \n", notestack.last, notestack.size, notestack);
-				bline.set(\gate, 1.0, \notenum, notestack.last);
+				bline.set(\gate, 1.0, \notenum, notestack.last - 12);
 			}
 		});
 
