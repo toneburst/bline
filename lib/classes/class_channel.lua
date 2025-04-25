@@ -142,7 +142,7 @@ function Channel:init(
 end -- End Channel:init(ch)
 
 -----------------------------------------
--- Add Params ---------------------------
+-- Add Channel Params -------------------
 -----------------------------------------
 
 -- Channel-specific params (override this method per-instance if required)
@@ -385,9 +385,9 @@ function Channel:calculatePattern()
         -- Get data at 4 corners
         -- a b
         -- c d
-		local a = pattern_map.pattern_nodes[row][col][self.channelIndex][step]
-		local b = pattern_map.pattern_nodes[row][col + 1][self.channelIndex][step]
-		local c = pattern_map.pattern_nodes[row + 1][col][self.channelIndex][step]
+		local a = pattern_map.pattern_nodes[row    ][col    ][self.channelIndex][step]
+		local b = pattern_map.pattern_nodes[row    ][col + 1][self.channelIndex][step]
+		local c = pattern_map.pattern_nodes[row + 1][col    ][self.channelIndex][step]
 		local d = pattern_map.pattern_nodes[row + 1][col + 1][self.channelIndex][step]
         -- Bilinear interpolation
         local a_b = (a * (1.0 - col_frac)) + (b * col_frac)

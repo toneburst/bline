@@ -1,12 +1,14 @@
 --[[
 Bline Pattern Data
+Singleton module
+https://www.tutorialspoint.com/lua/lua_singleton_modules.htm
 ]]--
 
 -----------------
 -- Data Tables --
 -----------------
 
-Tables = {}
+local Tables = {}
 
 -- Length of patterns
 Tables.pattern_nodes_length = 16
@@ -236,22 +238,23 @@ Tables.pattern_nodes = {
 -- Step Randomise Mask
 -- Threshold values for pattern step randomisation
 
-Tables.random_mask = {}
-Tables.random_mask[1]  = 1.0
-Tables.random_mask[2]  = 0.08216
-Tables.random_mask[3]  = 0.08216
-Tables.random_mask[4]  = 0.06548
-Tables.random_mask[5]  = 0.80644
-Tables.random_mask[6]  = 0.52499
-Tables.random_mask[7]  = 0.44361
-Tables.random_mask[8]  = 0.59757
-Tables.random_mask[9]  = 0.37221
-Tables.random_mask[10] = 0.64645
-Tables.random_mask[11] = 0.77321
-Tables.random_mask[12] = 0.44037
-Tables.random_mask[13] = 0.79841
-Tables.random_mask[14] = 0.70730
-Tables.random_mask[15] = 0.47467
-Tables.random_mask[16] = 0.51205
+Tables.random_mask = {
+	1.0,
+	0.08216,
+	0.08216,
+	0.06548,
+	0.80644,
+	0.52499,
+	0.44361,
+	0.59757,
+	0.37221,
+	0.64645,
+	0.77321,
+	0.44037,
+	0.79841,
+	0.70730,
+	0.47467,
+	0.51205
+}
 
 return Tables

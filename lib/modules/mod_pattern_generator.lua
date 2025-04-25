@@ -50,6 +50,7 @@ reset_names[6] = "16 Bars"
 
 -- Key 3 functions table
 local k3_functions = {}
+
 k3_functions[1] = {
     -- Do nothing
     label = "none",

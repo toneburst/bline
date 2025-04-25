@@ -11,19 +11,36 @@ Engine_Bline_Synth : CroneEngine {
 	// Default Param Values //
 	//////////////////////////
 
-	var p_waveform    = 0.85;
-	var p_sublevel    = 0.0;
-	var p_slidetime   = 0.1;
-	var p_cutoff      = 0.229;
-	var p_resonance   = 0.5;
-	var p_envmod      = 0.25;
-	var p_decay       = 0.5;
-	var p_accent      = 0.5;
-	var p_volume      = 0.9;
-	var p_filtermorph = 0.0;
-	var p_filterdrive = 0.0;
-	var p_dist        = -1.0;
-	var p_pan         = 0.0;
+	// Synth type: 0 = OG, 1 = Open303
+	var synthtype = 0;
+
+	// OG synth params
+	var p_o303_waveform		= 0.85;
+	var p_o303_sublevel		= 0.0;
+	var p_o303_slidetime	= 0.1;
+	var p_o303_cutoff		= 0.229;
+	var p_o303_resonance	= 0.5;
+	var p_o303_envmod		= 0.25;
+	var p_o303_decay		= 0.5;
+	var p_o303_accent		= 0.5;
+	var p_o303_volume		= 0.9;
+	var p_filtermorph		= 0.0;
+	var p_filterdrive 		= 0.0;
+	var p_o303_dist			= -1.0;
+	var p_o303_pan			= 0.0;
+	// Open303 params
+	var p_o303_waveform		= 0.0;
+	var p_o303_sublevel		= 0.0;
+	var p_o303_slidetime	= 0.1;
+	var p_o303_cutoff		= 0.229;
+	var p_o303_resonance	= 0.5;
+	var p_o303_envmod		= 0.25;
+	var p_o303_decay		= 0.5;
+	var p_o303_accent		= 0.5;
+	var p_o303_volume		= 0.9;
+	var p_o303_filtermorph	= 0.0;
+	var p_o303_dist			= -1.0;
+	var p_o303_pan			= 0.0;
 
 	// Note-stack list. Will contain MIDI note numbers of all currently-held keys
 	var notestack;
@@ -50,9 +67,9 @@ Engine_Bline_Synth : CroneEngine {
 			gate        = 0.0,
 			notenum     = 60.0,
 			notevel     = 64.0,
-			waveform    = 0.85,
-			sublevel    = 0.0,
-			slidetime   = 0.1,
+			waveform    = 0.0,
+			sublevel    = 0.0,	// Not yet implemented
+			slidetime   = 0.1,	// Not yet implemented
 			cutoff      = 0.229,
 			resonance   = 0.5,
 			envmod      = 0.25,
@@ -60,7 +77,7 @@ Engine_Bline_Synth : CroneEngine {
 			accent      = 0.5,
 			volume      = 1.0,
 			filtermorph = 0.0,
-			filterdrive = 0.0,
+			filterdrive = 0.0,	// Not yet implemented (not sure what range of values to use)
 			dist        = 0.0,
 			pan         = 0.0;
 
@@ -128,19 +145,19 @@ Engine_Bline_Synth : CroneEngine {
 		bline = Synth("Open303Bass");
 		bline.set(
 			\gate,        0,
-			\waveform,    p_waveform,
-			\sublevel,    p_waveform,
-			\slidetime,   p_slidetime,
-			\cutoff,      p_cutoff,
-			\resonance,   p_resonance,
-			\envmod,      p_envmod,
-			\decay,       p_decay,
-			\accent,      p_accent,
-			\volume ,     p_volume,
-			\filtermorph, p_filtermorph,
-			\filterdrive, p_filterdrive,
-			\dist,        p_dist,
-			\pan,         p_pan
+			\waveform,    p_o303_waveform,
+			\sublevel,    p_o303_waveform,
+			\slidetime,   p_o303_slidetime,
+			\cutoff,      p_o303_cutoff,
+			\resonance,   p_o303_resonance,
+			\envmod,      p_o303_envmod,
+			\decay,       p_o303_decay,
+			\accent,      p_o303_accent,
+			\volume ,     p_o303_volume,
+			\filtermorph, p_o303_filtermorph,
+			\filterdrive, p_o303_filterdrive,
+			\dist,        p_o303_dist,
+			\pan,         p_o303_pan
 		);
 
         /////////////////
@@ -207,7 +224,7 @@ Engine_Bline_Synth : CroneEngine {
 			bline.set(\resonance, p_resonance);
 		});
 
-		this.addCommand("filter_morph", "f", { arg msg;
+		this.addCommand("filter_overdrive", "f", { arg msg;
 			p_filtermorph = msg[1].linlin(0, 127, 0, 1);
 			bline.set(\filtermorph, p_filtermorph);
 		});
@@ -242,6 +259,10 @@ Engine_Bline_Synth : CroneEngine {
 			bline.set(\slidetime, p_slidetime);
 		});
 
+		this.addCommand("delay", "f", { arg msg;
+			// Doesn't do anything but has to be here for compatibility with OG bline
+		});
+
 		this.addCommand("volume", "f", { arg msg;
 			p_volume = msg[1].linlin(0, 127, 0, 1);
 			bline.set(\volume, p_volume);
@@ -257,68 +278,63 @@ Engine_Bline_Synth : CroneEngine {
 		//////////////////////////
 
 		this.addCommand("o303_waveform", "f", { arg msg;
-			p_waveform = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\waveform, p_waveform);
+			p_waveform = msg[1];
+			bline.set(\waveform, p_o303_waveform);
 		});
 
 		this.addCommand("o303_sub_level", "f", { arg msg;
-			p_sublevel = msg[1].linlin(0, 127, -1, -0.75);
+			p_sublevel = msg[1].linlin(0, 1, -1, -0.75);
 			//bline.set(\sublevel, p_sublevel);
 		});
 
 		this.addCommand("o303_cutoff", "f", { arg msg;
-			p_cutoff = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\cutoff, p_cutoff);
+			p_o303_cutoff = msg[1];	// 0 - 1
+			bline.set(\cutoff, p_o303_cutoff);
 		});
 
 		this.addCommand("o303_resonance", "f", { arg msg;
-			p_resonance = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\resonance, p_resonance);
+			p_o303_resonance = msg[1];	// 0 - 1
+			bline.set(\resonance, p_o303_resonance);
 		});
 
 		this.addCommand("o303_filter_morph", "f", { arg msg;
-			p_filtermorph = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\filtermorph, p_filtermorph);
+			p_o303_filtermorph = msg[1];	// 0 - 1
+			bline.set(\filtermorph, p_o303_filtermorph);
 		});
 
 		this.addCommand("o303_envelope", "f", { arg msg;
-			p_envmod = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\envmod, p_envmod);
+			p_o303_envmod = msg[1];	// 0 - 1
+			bline.set(\envmod, p_o303_envmod);
 		});
 
 		this.addCommand("o303_decay", "f", { arg msg;
-			p_decay = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\decay, p_decay);
+			p_o303_decay = msg[1];	// 0 - 1
+			bline.set(\decay, p_o303_decay);
 		});
 
 		this.addCommand("o303_accent", "f", { arg msg;
-			p_accent = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\accent, p_accent);
-		});
-
-		this.addCommand("o303_filter_morph", "f", { arg msg;
-			p_filtermorph = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\filtermorph, p_filtermorph);
+			p_o303_accent = msg[1];	// 0 - 1
+			bline.set(\accent, p_o303_accent);
 		});
 
 		this.addCommand("o303_distortion", "f", { arg msg;
-			p_dist = msg[1].linlin(0, 127, -1, 1);
-			bline.set(\dist, p_dist);
+			p_o303_dist = msg[1];	// -1 - 1
+			bline.set(\dist, p_o303_dist);
 		});
 
 		this.addCommand("o303_slide_time", "f", { arg msg;
-			p_slidetime = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\slidetime, p_slidetime);
+			p_o303_slidetime = msg[1];	// 0 - 1
+			bline.set(\slidetime, p_o303_slidetime);
 		});
 
 		this.addCommand("o303_volume", "f", { arg msg;
-			p_volume = msg[1].linlin(0, 127, 0, 1);
-			bline.set(\volume, p_volume);
+			p_o303_volume = msg[1];	// 0 - 1
+			bline.set(\volume, p_o303_volume);
 		});
 
 		this.addCommand("o303_pan", "f", { arg msg;
-			p_pan = msg[1].linlin(0, 127, -1, 1);
-			bline.set(\pan, p_pan);
+			p_o303_pan = msg[1];	// -1 to 1
+			bline.set(\pan, p_o303_pan);
 		});
 
 	} // end alloc

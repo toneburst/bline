@@ -1,5 +1,7 @@
 --[[
   Bline Note Player Module
+  Singleton module
+  https://www.tutorialspoint.com/lua/lua_singleton_modules.htm
 ]]--
 
 local ControlSpec = require "controlspec"
@@ -15,12 +17,12 @@ local Output = {}
 Output.outputType = 1
 
 Output.outputFunctions = {}
-Output.outputFunctions[1] = include("lib/modules/mod_output_bline_synth")
-Output.outputFunctions[2] = include("lib/modules/mod_output_bline_o303_synth")
-Output.outputFunctions[3] = include("lib/modules/mod_output_midi_basic")
---Output.outputFunctions[4] = include("lib/modules/mod_output_crow_x0x")
---Output.outputFunctions[5] = include("lib/modules/mod_output_midi_cc")
---Output.outputFunctions[6] = include("lib/modules/mod_output_crow_envs")
+Output.outputFunctions[1] = require(_path.code .. "bline/lib/modules/mod_output_bline_synth")
+Output.outputFunctions[2] = require(_path.code .. "bline/lib/modules/mod_output_bline_o303_synth")
+Output.outputFunctions[3] = require(_path.code .. "bline/lib/modules/mod_output_midi_basic")
+--Output.outputFunctions[4] = require(_path.code .. "bline/lib/modules/mod_output_crow_x0x")
+--Output.outputFunctions[5] = irequire(_path.code .. "bline/lib/modules/mod_output_midi_cc")
+--Output.outputFunctions[6] = require(_path.code .. "bline/lib/modules/mod_output_crow_envs")
 
 -- Current output device table
 Output.outputDevice = {}
@@ -28,8 +30,8 @@ Output.outputDevice = Output.outputFunctions[1]
 
 -- List of output modes
 Output.outputDevices = {}
-Output.outputDevices[1] = "Internal Synth"
-Output.outputDevices[2] = "Internal Open303 Synth"
+Output.outputDevices[1] = "Internal Synth (OG)"
+Output.outputDevices[2] = "Internal Synth (Open303)"
 Output.outputDevices[3] = "MIDI Basic"
 --Output.outputDevices[4] = "Crow X0X"
 --Output.outputDevices[5] = "MIDI + CCs"
@@ -259,7 +261,7 @@ function Output.init(debug)
     Output.addParams()
 
 	-- Init all output modules
-	for index, output in ipairs(Output.outputFunctions) do
+	for __, output in ipairs(Output.outputFunctions) do
     	output:init(nil)
 	end
 

@@ -1,5 +1,8 @@
 --[[
 Bline Output Module
+Singleton module
+https://www.tutorialspoint.com/lua/lua_singleton_modules.htm
+
 Basic MIDI Output (note + velocity)
 ]]--
 
