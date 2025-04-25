@@ -1,30 +1,30 @@
 --[[
 Bline Output Module
-Singleton module
-https://www.tutorialspoint.com/lua/lua_singleton_modules.htm
-
 Basic MIDI Output (note + velocity)
 ]]--
 
 local ControlSpec = require 'controlspec'
 
-local MIDIOutBasic = {}
-
-MIDIOutBasic.deviceName = "MIDI Basic"
+local deviceName = "MIDI Basic"
 -- Parameter group name
-MIDIOutBasic.paramGroupName = ""
+local paramGroupName = ""
 -- Parameter ID prefix
-MIDIOutBasic.paramIDPrefix = "output_midi_basic_"
+local paramIDPrefix = "output_midi_basic_"
 
-MIDIOutBasic.midi_out_device = nil
-MIDIOutBasic.midi_out_channel = nil
+local midiOutDevice = nil
+local midiOutChannel = nil
 
 -- Non-Accent velocity
-MIDIOutBasic.velocityNonAccent = 100
+local velocityNonAccent = 100
 -- Accent velocity
-MIDIOutBasic.velocityAccent = 127
+local velocityAccent = 127
 -- Octave-shift
-MIDIOutBasic.octaveShift = 0
+local octaveShift = 0
+
+local MIDIOutBasic = {}
+
+-- Make device name accessible
+MIDIOutBasic.deviceName = deviceName
 
 -- Debug mode toggle
 MIDIOutBasic.debugMode = false
@@ -37,70 +37,70 @@ function MIDIOutBasic.addParams()
 
 	print("Adding params")
 
-	params:add_group(MIDIOutBasic.paramGroupName, 5)
+	params:add_group(paramGroupName, 5)
 
 	-- Get list of available MIDI devices
 	local devices = {}
-	for id, device in pairs(midi.vports) do
-		devices[id] = device.name
+	for i, device in pairs(midi.vports) do
+		devices[i] = device.name
 	end
 
 	-- Add MIDI output device param
 	params:add {
 		type = "option",
-		id = MIDIOutBasic.paramIDPrefix .. "midi_device",
+		id = paramIDPrefix .. "midi_device",
 		name = "Device",
 		options = devices,
 		default = 2,
 		action = function(x)
-			MIDIOutBasic.midi_out_device = midi.connect(x)
+			midiOutDevice = midi.connect(x)
 		end
 	}
 
 	-- Add MIDI output channel param
 	params:add {
 		type = "number",
-		id = MIDIOutBasic.paramIDPrefix .. "midi_channel",
+		id = paramIDPrefix .. "midi_channel",
 		name = "Channel",
 		min = 1,
 		max = 16,
 		default = 1,
 		action = function(x)
 			MIDIOutBasic.allNotesOff()
-			MIDIOutBasic.midi_out_channel = x
+			midiOutChannel = x
 		end
   	}
 
 	-- Add non-accent velocity param
 	params:add {
 		type = "number",
-		id = MIDIOutBasic.paramIDPrefix .. "na_velocity",
+		id = paramIDPrefix .. "na_velocity",
 		name = "Non-Accent Velocity",
 		min = 0,
 		max = 127,
 		default = 100,
 		action = function(x)
-			MIDIOutBasic.velocityNonAccent = x
+			velocityNonAccent = x
 		end
 	}
 
 	-- Add non-accent velocity param
 	params:add {
 		type = "number",
-		id = MIDIOutBasic.paramIDPrefix .. "a_velocity",
+		id = paramIDPrefix .. "a_velocity",
 		name = "Accent Velocity",
 		min = 0,
 		max = 127,
 		default = 127,
 		action = function(x)
-			MIDIOutBasic.velocityAccent = x
+			velocityAccent = x
 		end
 	}
 
 	-- Add Panic param
 	params:add {
 		type = "trigger",
-		id = MIDIOutBasic.paramIDPrefix .. "PANIC",
+		id = paramIDPrefix .. "PANIC",
 		name = "PANIC",
 		action = function()
 			MIDIOutBasic.allNotesOff()
@@ -109,7 +109,7 @@ function MIDIOutBasic.addParams()
 
 
 	-- Hide param group
-	params:hide(MIDIOutBasic.paramGroupName)
+	params:hide(paramGroupName)
 
 	-- Rebuild params table
 	_menu.rebuild_params()
@@ -123,13 +123,13 @@ end -- End MIDIOutBasic.addParams()
 function MIDIOutBasic.noteOn(note, accent, slide, tie)
 
 	-- Velocity (Accent ON/OFF)
-	local velocity = MIDIOutBasic.velocityNonAccent
+	local velocity = velocityNonAccent
 	if accent then
-		velocity = MIDIOutBasic.velocityAccent
+		velocity = velocityAccent
 	end
 
 	-- Send note on
-	MIDIOutBasic.midi_out_device:note_on(note, velocity, MIDIOutBasic.midi_out_channel)
+	midiOutDevice:note_on(note, velocity, midiOutChannel)
 
 end -- End MIDIOutBasic.noteOn(note, velocity)
 
@@ -140,7 +140,7 @@ end -- End MIDIOutBasic.noteOn(note, velocity)
 function MIDIOutBasic.noteOff(note)
 
     -- Send note-off
-	MIDIOutBasic.midi_out_device:note_off(note, nil, MIDIOutBasic.midi_out_channel)
+	midiOutDevice:note_off(note, nil, midiOutChannel)
 
 end -- End MIDIOutBasic.noteOff(note)
 
@@ -150,7 +150,7 @@ end -- End MIDIOutBasic.noteOff(note)
 
 function MIDIOutBasic.allNotesOff()
 
-	MIDIOutBasic.midi_out_device:cc(123, 0, MIDIOutBasic.midi_out_channel)
+	midiOutDevice:cc(123, 0, midiOutChannel)
 
 end -- End MIDIOutBasic.allNotesOff()
 
@@ -160,12 +160,12 @@ end -- End MIDIOutBasic.allNotesOff()
 
 function MIDIOutBasic.unload()
 
-	print("Unloading Output module '" .. MIDIOutBasic.deviceName .. "'")
+	print("Unloading Output module '" .. deviceName .. "'")
 
     -- All notes off
 
 	-- Hide param group from menu
-	params:hide(MIDIOutBasic.paramGroupName)
+	params:hide(paramGroupName)
 
 	-- Rebuild params table
 	_menu.rebuild_params()
@@ -181,10 +181,10 @@ end -- End MIDIOutBasic.unload()
 
 function MIDIOutBasic.activate()
 
-	print("Activating Output module '" .. MIDIOutBasic.deviceName .. "'")
+	print("Activating Output module '" .. deviceName .. "'")
 
 	-- Unhide param group
-	params:show(MIDIOutBasic.paramGroupName)
+	params:show(paramGroupName)
 
 	-- Rebuild params table
 	_menu.rebuild_params()
@@ -197,7 +197,7 @@ end -- End MIDIOutBasic.activate()
 
 function MIDIOutBasic.init(debug)
 
-	print("Initialising Output module '" .. MIDIOutBasic.deviceName .. "'")
+	print("Initialising Output module '" .. deviceName .. "'")
 
 	if (debug == true) then
 		MIDIOutBasic.debugMode = true
@@ -211,17 +211,14 @@ function MIDIOutBasic.init(debug)
 	params:show("clock_crow_in_div") -- hide the 'crow in div' param
 
 	-- Setup MIDI output
-	MIDIOutBasic.midi_out_device = midi.connect(1)
-	MIDIOutBasic.midi_out_device.event = function() end
-
-	-- Turn on Mono Legato mode
-	-- MIDIOutBasic.midi_out_device:cc(68, 127, MIDIOutBasic.midi_out_channel)
+	midiOutDevice = midi.connect(1)
+	midiOutDevice.event = function() end
 
 	-- Param group name
-	MIDIOutBasic.paramGroupName = MIDIOutBasic.deviceName .. " Output"
+	paramGroupName = deviceName .. " Output"
 
 	-- Add params
-    MIDIOutBasic.addParams()
+	MIDIOutBasic.addParams()
 
 	-- Send all-notes-off
 	MIDIOutBasic.allNotesOff()

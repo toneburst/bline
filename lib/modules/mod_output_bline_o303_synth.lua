@@ -10,13 +10,16 @@ https://github.com/toneburst/Open303_SuperCollider
 
 local ControlSpec = require 'controlspec'
 
+local deviceName = "Open303 Synth"
+-- Parameter group name
+local paramGroupName = "Bline Open303 Synth"
+-- Parameter ID prefix
+local paramIDPrefix = "output_bline_open303_synth_"
+
 local BlineSynthO303 = {}
 
-BlineSynthO303.deviceName = "Bline Open303 Synth"
--- Parameter group name
-BlineSynthO303.deviceName = "Bline Open303 Synth"
--- Parameter ID prefix
-BlineSynthO303.paramIDPrefix = "output_bline_open303_synth_"
+-- Make device name accessible
+BlineSynthO303.deviceName = deviceName
 
 -- Debug mode toggle
 BlineSynthO303.debugMode = false
@@ -29,16 +32,16 @@ function BlineSynthO303.addParams()
 
 	print("Adding params")
 
-    params:add_group(BlineSynthO303.deviceName, 12)
+    params:add_group(paramGroupName, 12)
 
 	-- 1
     params:add_control(
-		BlineSynthO303.paramIDPrefix .. "waveform",
+		paramIDPrefix .. "waveform",
 		"Waveform",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "waveform",
+		paramIDPrefix .. "waveform",
 		function(x)
 			engine.o303_waveform(x)
 			--SCREEN_DIRTY = true
@@ -46,12 +49,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 2
 	params:add_control(
-		BlineSynthO303.paramIDPrefix .. "sub_level",
+		paramIDPrefix .. "sub_level",
 		"Sub Level",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
 	params:set_action(
-		BlineSynthO303.paramIDPrefix .. "sub_level",
+		paramIDPrefix .. "sub_level",
 		function(x)
 			engine.o303_sub_level(x)
 			--SCREEN_DIRTY = true
@@ -59,12 +62,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 3
     params:add_control(
-		BlineSynthO303.paramIDPrefix .. "cutoff",
+		paramIDPrefix .. "cutoff",
 		"Filter Cutoff",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "cutoff",
+		paramIDPrefix .. "cutoff",
 		function(x)
 			engine.o303_cutoff(x)
 			--SCREEN_DIRTY = true
@@ -72,12 +75,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 4
     params:add_control(
-		BlineSynthO303.paramIDPrefix .. "resonance",
+		paramIDPrefix .. "resonance",
 		"Filter Resonance",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "resonance",
+		paramIDPrefix .. "resonance",
 		function(x)
 			engine.o303_resonance(x)
 			--SCREEN_DIRTY = true
@@ -85,12 +88,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 5
 	params:add_control(
-		BlineSynthO303.paramIDPrefix .. "filter_morph",
+		paramIDPrefix .. "filter_morph",
 		"Filter Morph",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "filter_morph",
+		paramIDPrefix .. "filter_morph",
 		function(x)
 			engine.o303_filter_morph(x)
 			--SCREEN_DIRTY = true
@@ -98,12 +101,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 6
     params:add_control(
-		BlineSynthO303.paramIDPrefix .. "envelope",
+		paramIDPrefix .. "envelope",
 		"Filter Envelope",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "envelope",
+		paramIDPrefix .. "envelope",
 		function(x)
 			engine.o303_envelope(x)
 			--SCREEN_DIRTY = true
@@ -111,12 +114,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 7
     params:add_control(
-		BlineSynthO303.paramIDPrefix .. "decay",
+		paramIDPrefix .. "decay",
 		"Envelope Decay",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "decay",
+		paramIDPrefix .. "decay",
 		function(x)
 			engine.o303_decay(x)
 			--SCREEN_DIRTY = true
@@ -124,12 +127,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 8
     params:add_control(
-		BlineSynthO303.paramIDPrefix .. "accent",
+		paramIDPrefix .. "accent",
 		"Accent",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "accent",
+		paramIDPrefix .. "accent",
 		function(x)
 			engine.o303_accent(x)
 			--SCREEN_DIRTY = true
@@ -137,12 +140,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 9
     params:add_control(
-		BlineSynthO303.paramIDPrefix .. "slide_time",
+		paramIDPrefix .. "slide_time",
 		"Slide Time",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "slide_time",
+		paramIDPrefix .. "slide_time",
 		function(x)
 			engine.o303_slide_time(x)
 			--SCREEN_DIRTY = true
@@ -150,12 +153,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 10
 	params:add_control(
-		BlineSynthO303.paramIDPrefix .. "distortion",
+		paramIDPrefix .. "distortion",
 		"Distortion",
 		ControlSpec.new(0, 127, 'lin', -1, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "distortion",
+		paramIDPrefix .. "distortion",
 		function(x)
 			engine.o303_distortion(x)
 			--SCREEN_DIRTY = true
@@ -163,12 +166,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 11
 	params:add_control(
-		BlineSynthO303.paramIDPrefix .. "amp",
+		paramIDPrefix .. "amp",
 		"Amp",
 		ControlSpec.new(0, 127, 'lin', 0, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "amp",
+		paramIDPrefix .. "amp",
 		function(x)
 			engine.o303_volume(x)
 			--SCREEN_DIRTY = true
@@ -176,12 +179,12 @@ function BlineSynthO303.addParams()
 	)
 	-- 12
 	params:add_control(
-		BlineSynthO303.paramIDPrefix .. "pan",
+		paramIDPrefix .. "pan",
 		"Pan",
 		ControlSpec.new(0, 127, 'lin', -1, 1)
 	)
     params:set_action(
-		BlineSynthO303.paramIDPrefix .. "pan",
+		paramIDPrefix .. "pan",
 		function(x)
 			engine.o303_pan(x)
 			--SCREEN_DIRTY = true
@@ -189,7 +192,7 @@ function BlineSynthO303.addParams()
 	)
 
 	-- Hide param group from menu
-	params:hide(BlineSynthO303.deviceName)
+	params:hide(paramGroupName)
 
 	-- Rebuild params table
 	_menu.rebuild_params()
@@ -240,10 +243,10 @@ end -- End BlineSynthO303.allNotesOff()
 
 function BlineSynthO303.activate()
 
-	print("Activating Output module '" .. BlineSynthO303.deviceName .. "'")
+	print("Activating Output module '" .. deviceName .. "'")
 
 	-- Unhide param group
-	params:show(BlineSynthO303.deviceName)
+	params:show(paramGroupName)
 
 	-- Rebuild params table
 	_menu.rebuild_params()
@@ -256,7 +259,7 @@ end -- End BlineSynthO303.activate()
 
 function BlineSynthO303.init(debug)
 
-	print("Initialising Output module '" .. BlineSynthO303.deviceName .. "'")
+	print("Initialising Output module '" .. deviceName .. "'")
 
 	if (debug == true) then
 		BlineSynthO303.debugMode = true
@@ -277,13 +280,13 @@ end -- End BlineSynthO303.init()
 
 function BlineSynthO303.unload()
 
-	print("Unloading Output module '" .. BlineSynthO303.deviceName .. "'")
+	print("Unloading Output module '" .. deviceName .. "'")
 
     -- Reset Synth
     BlineSynthO303.allNotesOff()
 
 	-- Hide param group from menu
-	params:hide(BlineSynthO303.deviceName)
+	params:hide(paramGroupName)
 
 	-- Rebuild params table
 	_menu.rebuild_params()
