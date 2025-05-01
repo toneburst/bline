@@ -378,7 +378,7 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("o303_all_notes_off", "i", { arg msg;
-			o303_notestack = [];	// 0 - 1
+			o303_notestack = [];
 			o303synth.set(\notealloff, 1);
 		});
 

@@ -6,41 +6,35 @@
 
 local ControlSpec = require "controlspec"
 
--- Include
---local deviceBlineSynth = include("lib/modules/mod_output_bline_synth")
-
+-- First-run flag
 local first_run = true
 
-local Output = {}
-
 -- Output function index
-Output.outputType = 1
+local outputType = 1
 
-Output.outputFunctions = {}
-Output.outputFunctions[1] = require(_path.code .. "bline/lib/modules/mod_output_bline_synth")
-Output.outputFunctions[2] = require(_path.code .. "bline/lib/modules/mod_output_bline_o303_synth")
-Output.outputFunctions[3] = require(_path.code .. "bline/lib/modules/mod_output_midi_basic")
---Output.outputFunctions[4] = require(_path.code .. "bline/lib/modules/mod_output_crow_x0x")
---Output.outputFunctions[5] = irequire(_path.code .. "bline/lib/modules/mod_output_midi_cc")
---Output.outputFunctions[6] = require(_path.code .. "bline/lib/modules/mod_output_crow_envs")
+-- Step-length
+local stepLength = nil
+
+local outputFunctions = {}
+outputFunctions[1] = require(_path.code .. "bline/lib/modules/mod_output_bline_synth")
+outputFunctions[2] = require(_path.code .. "bline/lib/modules/mod_output_bline_o303_synth")
+outputFunctions[3] = require(_path.code .. "bline/lib/modules/mod_output_midi_basic")
+--outputFunctions[4] = require(_path.code .. "bline/lib/modules/mod_output_crow_x0x")
+--outputFunctions[5] = irequire(_path.code .. "bline/lib/modules/mod_output_midi_cc")
+--outputFunctions[6] = require(_path.code .. "bline/lib/modules/mod_output_crow_envs")
+
+-- List of output modes (populated at init)
+local outputDevices = {}
 
 -- Current output device table
-Output.outputDevice = {}
-Output.outputDevice = Output.outputFunctions[1]
+local outputDevice = {}
 
--- List of output modes
-Output.outputDevices = {}
-Output.outputDevices[1] = "Internal Synth (OG)"
-Output.outputDevices[2] = "Internal Synth (Open303)"
-Output.outputDevices[3] = "MIDI Basic"
---Output.outputDevices[4] = "Crow X0X"
---Output.outputDevices[5] = "MIDI + CCs"
---Output.outputDevices[6] = "Crow Envelopes"
-
-Output.previousNote = {
+local previousNote = {
 	note = 0,
 	slide = false
 }
+
+local Output = {}
 
 -- Debug mode toggle
 Output.debugMode = false
@@ -56,7 +50,7 @@ function Output.addParams()
     params:add_option(
 		"output_device",
 		"Output Device",
-		Output.outputDevices,
+		outputDevices,
 		1
 	)
     params:set_action(
@@ -74,18 +68,21 @@ end -- End Output.addParams()
 
 function Output.changeOutput(index)
 
-    print("Output module setting output device to " .. Output.outputDevices[index])
+    print("Output module setting output device to " .. outputDevices[index])
 
 	-- Unload previous device if not first-run
-	-- if (first_run == true) then
-    	-- Silence current device
-    	Output.outputDevice.unload()
-	-- 	first_run = false
-	-- end
+	-- Needed because this function gets called when param added to set initial value
+	if (first_run == true) then
+    	-- Toggle first_run so we can unload devices next time output changes
+		first_run = false
+	else
+		-- Silence current device
+    	outputDevice.unload()
+	end
 
     -- Select new device, initialise
-    Output.outputDevice = Output.outputFunctions[index]
-    Output.outputDevice.activate()
+    outputDevice = outputFunctions[index]
+    outputDevice.activate()
 
 end -- End Output.changeOutput(index)
 
@@ -96,10 +93,10 @@ end -- End Output.changeOutput(index)
 -- Send note-on to active output device
 function Output.playNote(note, accent, slide, rest, step_length)
 
-	Output.stepLength = step_length
+	stepLength = step_length
 
 	-- Tie flag (current note number same as previous note number)
-	local tie = (Output.previousNote["note_num"] == note)
+	local tie = (previousNote["note_num"] == note)
 
 	--[[
 
@@ -122,11 +119,11 @@ function Output.playNote(note, accent, slide, rest, step_length)
 	-- Check if current note is rest
 	if (rest) then
 		-- If previous note still playing, turn off immediately
-		if (Output.previousNote["slide"]) then
-			Output.previousNoteOffImmediate(Output.previousNote["note"])
+		if (previousNote["slide"]) then
+			previousNoteOffImmediate(previousNote["note"])
 		end
 		-- Else do nothing
-	elseif (Output.previousNote["slide"] == true) then -- PREVIOUS NOTE SLIDE
+	elseif (previousNote["slide"] == true) then -- PREVIOUS NOTE SLIDE
 		-- Check current note slide
 		if (slide == true) then -- SLIDE SLIDE
 			-- Check for tie
@@ -134,7 +131,7 @@ function Output.playNote(note, accent, slide, rest, step_length)
 				--  Do note-on
 				Output.sendNoteOn(note, accent, slide, rest)
 				-- Schedule previous note-off (with overlap)
-				clock.run(Output.schedulePreviousNoteOff, Output.previousNote["note"])
+				clock.run(Output.schedulePreviousNoteOff, previousNote["note"])
 			end
 		else -- SLIDE NON-SLIDE
 			-- Check tie
@@ -143,7 +140,7 @@ function Output.playNote(note, accent, slide, rest, step_length)
 				Output.sendNoteOn(note, accent, slide, rest)
 			end
 			-- Schedule previous note-off (with overlap)
-			clock.run(Output.schedulePreviousNoteOff, Output.previousNote["note"])
+			clock.run(Output.schedulePreviousNoteOff, previousNote["note"])
 			-- Schedule current note-off
 			clock.run(Output.scheduleCurrentNoteOff, note)
 		end -- End check current note slide
@@ -161,10 +158,10 @@ function Output.playNote(note, accent, slide, rest, step_length)
 	end -- End check previous note slide
 
     -- Sent message to engine
-    --Output.outputDevice.noteOn(note, accent, slide, rest, step_length)
+    --outputDevice.noteOn(note, accent, slide, rest, step_length)
 
 	-- Set previous note
-	Output.previousNote = {
+	previousNote = {
         note = note,
         slide = slide
     }
@@ -184,7 +181,7 @@ function Output.sendNoteOn(note, accent, slide, rest)
     end
 
     -- Send note on
-    Output.outputDevice.noteOn(note, accent, slide, rest)
+    outputDevice.noteOn(note, accent, slide, rest)
 
 end
 
@@ -195,13 +192,13 @@ end
 function Output.scheduleCurrentNoteOff(note)
 
     -- Calculate 16th note gate-length
-    local sleeptime = Output.stepLength * params:get("pgen_gate_length")
+    local sleeptime = stepLength * params:get("pgen_gate_length")
 
     -- Pause clock
     clock.sleep(sleeptime)
 
     -- Send note-off
-    Output.outputDevice.noteOff(note, false)
+    outputDevice.noteOff(note, false)
 
 end -- End Output.scheduleCurrentNoteOff(note)
 
@@ -209,12 +206,12 @@ end -- End Output.scheduleCurrentNoteOff(note)
 -- Immediate Note Off ----------------------------
 --------------------------------------------------
 
-function Output.previousNoteOffImmediate(previous_note)
+function previousNoteOffImmediate(previous_note)
 
 	-- Send note-off
-    Output.outputDevice.noteOff(previous_note, false)
+    outputDevice.noteOff(previous_note, false)
 
-end -- End Output.previousNoteOffImmediate(previous_note)
+end -- End previousNoteOffImmediate(previous_note)
 
 --------------------------------------------------
 -- Schedule Overlap Note Off ---------------------
@@ -223,13 +220,13 @@ end -- End Output.previousNoteOffImmediate(previous_note)
 function Output.schedulePreviousNoteOff(previous_note)
 
     -- Calculate 16th note gate-length
-    local sleeptime = Output.stepLength * 0.01
+    local sleeptime = stepLength * 0.01
 
     -- Pause clock
     clock.sleep(sleeptime)
 
     -- Send note-off
-    Output.outputDevice.noteOff(previous_note, true)
+    outputDevice.noteOff(previous_note, true)
 
 end -- End Output.schedulePreviousNoteOff(previous_note)
 
@@ -240,7 +237,7 @@ end -- End Output.schedulePreviousNoteOff(previous_note)
 function Output.allNotesOff()
 
 	-- Send All Notes Off message to output device
-	Output.outputDevice.allNotesOff()
+	outputDevice.allNotesOff()
 
 end -- End Output.allNotesOff()
 
@@ -257,11 +254,16 @@ function Output.init(debug)
 		print("Setting debug mode ON")
     end
 
+	-- Get device names
+	for i, output in ipairs(outputFunctions) do
+    	outputDevices[i] = outputFunctions[i].deviceName
+	end
+
     -- set Params
     Output.addParams()
 
 	-- Init all output modules
-	for __, output in ipairs(Output.outputFunctions) do
+	for __, output in ipairs(outputFunctions) do
     	output:init(nil)
 	end
 
