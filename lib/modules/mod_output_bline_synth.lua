@@ -8,16 +8,13 @@ Original internal Synth engine
 
 local ControlSpec = require 'controlspec'
 
-local deviceName = "Bline Synth"
--- Parameter group name
-local paramGroupName = "Bline Synth"
--- Parameter ID prefix
-local paramIDPrefix = "output_bline_synth_"
-
 local BlineSynth = {}
 
--- Make devicename accessible
-BlineSynth.deviceName = deviceName
+BlineSynth.deviceName = "Bline Synth"
+-- Parameter group name
+BlineSynth.paramGroupName = "Bline Synth"
+-- Parameter ID prefix
+BlineSynth.paramIDPrefix = "output_bline_synth_"
 
 -- Debug mode toggle
 BlineSynth.debugMode = false
@@ -30,16 +27,16 @@ function BlineSynth.addParams()
 
 	print("Adding params")
 
-    params:add_group(paramGroupName, 13)
+    params:add_group(BlineSynth.paramGroupName, 12)
 
 	-- 1
     params:add_control(
-		paramIDPrefix .. "waveform",
+		BlineSynth.paramIDPrefix .. "waveform",
 		"Waveform",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "waveform",
+		BlineSynth.paramIDPrefix .. "waveform",
 		function(x)
 			engine.waveform(x)
 			--SCREEN_DIRTY = true
@@ -47,12 +44,12 @@ function BlineSynth.addParams()
 	)
 	-- 2
 	params:add_control(
-		paramIDPrefix .. "sub_level",
+		BlineSynth.paramIDPrefix .. "sub_level",
 		"Sub Level",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
 	params:set_action(
-		paramIDPrefix .. "sub_level",
+		BlineSynth.paramIDPrefix .. "sub_level",
 		function(x)
 			engine.sub_level(x)
 			--SCREEN_DIRTY = true
@@ -60,12 +57,12 @@ function BlineSynth.addParams()
 	)
 	-- 3
     params:add_control(
-		paramIDPrefix .. "cutoff",
+		BlineSynth.paramIDPrefix .. "cutoff",
 		"Filter Cutoff",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "cutoff",
+		BlineSynth.paramIDPrefix .. "cutoff",
 		function(x)
 			engine.cutoff(x)
 			--SCREEN_DIRTY = true
@@ -73,12 +70,12 @@ function BlineSynth.addParams()
 	)
 	-- 4
     params:add_control(
-		paramIDPrefix .. "resonance",
+		BlineSynth.paramIDPrefix .. "resonance",
 		"Filter Resonance",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "resonance",
+		BlineSynth.paramIDPrefix .. "resonance",
 		function(x)
 			engine.resonance(x)
 			--SCREEN_DIRTY = true
@@ -86,12 +83,12 @@ function BlineSynth.addParams()
 	)
 	-- 5
     params:add_control(
-		paramIDPrefix .. "filter_overdrive",
+		BlineSynth.paramIDPrefix .. "filter_overdrive",
 		"Filter Overdrive",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "filter_overdrive",
+		BlineSynth.paramIDPrefix .. "filter_overdrive",
 		function(x)
 			engine.filter_overdrive(x)
 			--SCREEN_DIRTY = true
@@ -99,12 +96,12 @@ function BlineSynth.addParams()
 	)
 	-- 6
     params:add_control(
-		paramIDPrefix .. "envelope",
+		BlineSynth.paramIDPrefix .. "envelope",
 		"Filter Envelope",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "envelope",
+		BlineSynth.paramIDPrefix .. "envelope",
 		function(x)
 			engine.envelope(x)
 			--SCREEN_DIRTY = true
@@ -112,12 +109,12 @@ function BlineSynth.addParams()
 	)
 	-- 7
     params:add_control(
-		paramIDPrefix .. "decay",
+		BlineSynth.paramIDPrefix .. "decay",
 		"Envelope Decay",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "decay",
+		BlineSynth.paramIDPrefix .. "decay",
 		function(x)
 			engine.decay(x)
 			--SCREEN_DIRTY = true
@@ -125,12 +122,12 @@ function BlineSynth.addParams()
 	)
 	-- 8
     params:add_control(
-		paramIDPrefix .. "accent",
+		BlineSynth.paramIDPrefix .. "accent",
 		"Accent",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "accent",
+		BlineSynth.paramIDPrefix .. "accent",
 		function(x)
 			engine.accent(x)
 			--SCREEN_DIRTY = true
@@ -138,12 +135,12 @@ function BlineSynth.addParams()
 	)
 	-- 9
     params:add_control(
-		paramIDPrefix .. "slide_time",
+		BlineSynth.paramIDPrefix .. "slide_time",
 		"Slide Time",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "slide_time",
+		BlineSynth.paramIDPrefix .. "slide_time",
 		function(x)
 			engine.slide_time(x)
 			--SCREEN_DIRTY = true
@@ -151,51 +148,38 @@ function BlineSynth.addParams()
 	)
 	-- 10
 	params:add_control(
-		paramIDPrefix .. "delay",
-		"Delay",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
-	)
-	params:set_action(
-		paramIDPrefix .. "delay",
-		function(x)
-			engine.delay(x)
-			--SCREEN_DIRTY = true
-		end
-	)
-	-- 11
-	params:add_control(
-		paramIDPrefix .. "distortion",
+		BlineSynth.paramIDPrefix .. "distortion",
 		"Distortion",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "distortion",
+		BlineSynth.paramIDPrefix .. "distortion",
 		function(x)
 			engine.distortion(x)
 			--SCREEN_DIRTY = true
 		end
 	)
-	-- 12
+	-- 11
 	params:add_control(
-		paramIDPrefix .. "amp",
+		BlineSynth.paramIDPrefix .. "amp",
 		"Amp",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "amp",
+		BlineSynth.paramIDPrefix .. "amp",
 		function(x)
 			engine.volume(x)
 			--SCREEN_DIRTY = true
 		end
 	)
-	-- 13
+	-- 12
 	params:add_control(
-		paramIDPrefix .. "pan",
+		BlineSynth.paramIDPrefix .. "pan",
 		"Pan",
 		ControlSpec.new(0, 127, 'lin', 0, 127)
 	)
     params:set_action(
-		paramIDPrefix .. "pan",
+		BlineSynth.paramIDPrefix .. "pan",
 		function(x)
 			engine.pan(x)
 			--SCREEN_DIRTY = true
@@ -203,7 +187,7 @@ function BlineSynth.addParams()
 	)
 
 	-- Hide param group from menu
-	params:hide(paramGroupName)
+	params:hide(BlineSynth.paramGroupName)
 
 	-- Rebuild params table
 	_menu.rebuild_params()
@@ -254,10 +238,10 @@ end -- End BlineSynth.allNotesOff()
 
 function BlineSynth.activate()
 
-	print("Activating Output module '" .. deviceName .. "'")
+	print("Activating Output module '" .. BlineSynth.deviceName .. "'")
 
 	-- Unhide param group
-	params:show(paramGroupName)
+	params:show(BlineSynth.paramGroupName)
 
 	-- Rebuild params table
 	_menu.rebuild_params()
@@ -270,7 +254,7 @@ end -- End BlineSynth.activate()
 
 function BlineSynth.init(debug)
 
-	print("Initialising Output module '" .. deviceName .. "'")
+	print("Initialising Output module '" .. BlineSynth.deviceName .. "'")
 
 	if (debug == true) then
 		BlineSynth.debugMode = true
@@ -291,13 +275,13 @@ end -- End BlineSynth.init()
 
 function BlineSynth.unload()
 
-	print("Unloading Output module '" .. deviceName .. "'")
+	print("Unloading Output module '" .. BlineSynth.deviceName .. "'")
 
     -- Reset Synth
     BlineSynth.allNotesOff()
 
 	-- Hide param group from menu
-	params:hide(paramGroupName)
+	params:hide(BlineSynth.paramGroupName)
 
 	-- Rebuild params table
 	_menu.rebuild_params()
