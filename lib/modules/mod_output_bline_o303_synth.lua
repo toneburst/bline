@@ -17,7 +17,7 @@ local paramIDPrefix = "output_bline_open303_synth_"
 
 local BlineSynthO303 = {}
 
-BlineSynthO303.deviceName  = "Open303 Synth"
+BlineSynthO303.deviceName  = "Bline Open303 Synth"
 
 -- Debug mode toggle
 BlineSynthO303.debugMode = false

@@ -25,8 +25,9 @@ Engine_Bline_Synth : CroneEngine {
 	var p_bline_volume;
 	var p_bline_pan;
 	// Additional params
-	var p_bline_accdcy;
+	var p_bline_accdcy = 0.3;
 	var p_bline_accthreshold;
+
 
 	// Open303 core synth params (see synthDef for default param values)
 	var p_o303_waveform;
