@@ -15,19 +15,19 @@ local outputType = 1
 -- Step-length
 local stepLength = nil
 
-local outputFunctions = {}
-outputFunctions[1] = require(_path.code .. "bline/lib/modules/mod_output_bline_synth")
-outputFunctions[2] = require(_path.code .. "bline/lib/modules/mod_output_bline_o303_synth")
-outputFunctions[3] = require(_path.code .. "bline/lib/modules/mod_output_midi_basic")
---outputFunctions[4] = require(_path.code .. "bline/lib/modules/mod_output_crow_x0x")
---outputFunctions[5] = irequire(_path.code .. "bline/lib/modules/mod_output_midi_cc")
---outputFunctions[6] = require(_path.code .. "bline/lib/modules/mod_output_crow_envs")
+local outputModules = {}
+outputModules[1] = require(_path.code .. "bline/lib/modules/mod_output_bline_synth")
+outputModules[2] = require(_path.code .. "bline/lib/modules/mod_output_bline_o303_synth")
+outputModules[3] = require(_path.code .. "bline/lib/modules/mod_output_midi_basic")
+--outputModules[4] = require(_path.code .. "bline/lib/modules/mod_output_crow_x0x")
+--outputModules[5] = irequire(_path.code .. "bline/lib/modules/mod_output_midi_cc")
+--outputModules[6] = require(_path.code .. "bline/lib/modules/mod_output_crow_envs")
 
 -- List of output modes (populated at init)
-local outputDevices = {}
+local outputModuleNames = {}
 
 -- Current output device table
-local outputDevice = {}
+local currentOutputModule = {}
 
 local previousNote = {
 	note = 0,
@@ -50,7 +50,7 @@ function Output.addParams()
     params:add_option(
 		"output_device",
 		"Output Device",
-		outputDevices,
+		outputModuleNames,
 		1
 	)
     params:set_action(
@@ -68,7 +68,7 @@ end -- End Output.addParams()
 
 function Output.changeOutput(index)
 
-    print("Output module setting output device to " .. outputDevices[index])
+    print("Output module setting output device to " .. outputModuleNames[index])
 
 	-- Unload previous device if not first-run
 	-- Needed because this function gets called when param added to set initial value
@@ -77,12 +77,12 @@ function Output.changeOutput(index)
 		first_run = false
 	else
 		-- Silence current device
-    	outputDevice.unload()
+    	currentOutputModule.unload()
 	end
 
     -- Select new device, initialise
-    outputDevice = outputFunctions[index]
-    outputDevice.activate()
+    currentOutputModule = outputModules[index]
+    currentOutputModule.activate()
 
 end -- End Output.changeOutput(index)
 
@@ -158,7 +158,7 @@ function Output.playNote(note, accent, slide, rest, step_length)
 	end -- End check previous note slide
 
     -- Sent message to engine
-    --outputDevice.noteOn(note, accent, slide, rest, step_length)
+    --currentOutputModule.noteOn(note, accent, slide, rest, step_length)
 
 	-- Set previous note
 	previousNote = {
@@ -181,7 +181,7 @@ function Output.sendNoteOn(note, accent, slide, rest)
     end
 
     -- Send note on
-    outputDevice.noteOn(note, accent, slide, rest)
+    currentOutputModule.noteOn(note, accent, slide, rest)
 
 end
 
@@ -198,7 +198,7 @@ function Output.scheduleCurrentNoteOff(note)
     clock.sleep(sleeptime)
 
     -- Send note-off
-    outputDevice.noteOff(note, false)
+    currentOutputModule.noteOff(note, false)
 
 end -- End Output.scheduleCurrentNoteOff(note)
 
@@ -209,7 +209,7 @@ end -- End Output.scheduleCurrentNoteOff(note)
 function previousNoteOffImmediate(previous_note)
 
 	-- Send note-off
-    outputDevice.noteOff(previous_note, false)
+    currentOutputModule.noteOff(previous_note, false)
 
 end -- End previousNoteOffImmediate(previous_note)
 
@@ -226,7 +226,7 @@ function Output.schedulePreviousNoteOff(previous_note)
     clock.sleep(sleeptime)
 
     -- Send note-off
-    outputDevice.noteOff(previous_note, true)
+    currentOutputModule.noteOff(previous_note, true)
 
 end -- End Output.schedulePreviousNoteOff(previous_note)
 
@@ -237,7 +237,7 @@ end -- End Output.schedulePreviousNoteOff(previous_note)
 function Output.allNotesOff()
 
 	-- Send All Notes Off message to output device
-	outputDevice.allNotesOff()
+	currentOutputModule.allNotesOff()
 
 end -- End Output.allNotesOff()
 
@@ -255,15 +255,15 @@ function Output.init(debug)
     end
 
 	-- Get device names
-	for i, output in ipairs(outputFunctions) do
-    	outputDevices[i] = outputFunctions[i].deviceName
+	for i, output in ipairs(outputModules) do
+    	outputModuleNames[i] = outputModules[i].deviceName
 	end
 
     -- set Params
     Output.addParams()
 
 	-- Init all output modules
-	for __, output in ipairs(outputFunctions) do
+	for __, output in ipairs(outputModules) do
     	output:init(nil)
 	end
 
