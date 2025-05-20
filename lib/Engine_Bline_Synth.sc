@@ -28,14 +28,10 @@ Engine_Bline_Synth : CroneEngine {
 	var p_bline_accdcy = 0.3;
 	var p_bline_accthreshold;
 
-
 	// Open303 core synth params (see synthDef for default param values)
 	var p_o303_waveform;
-	var p_o303_sublevel;
-	var p_o303_slidetime;
 	var p_o303_cutoff;
 	var p_o303_resonance;
-	var p_o303_filterdrive;	// Not yet implemented (not sure what range of values to use)
 	var p_o303_envmod;
 	var p_o303_decay;
 	var p_o303_accent;
@@ -44,6 +40,8 @@ Engine_Bline_Synth : CroneEngine {
 	var p_o303_pan;
 	// Additional params
 	var p_o303_filtermorph;
+	var p_o303_sublevel;
+	var p_o303_slidetime;
 
 	// Note-stack array for OG Bline synth. Will contain frequencies of all currently-held keys
 	var bline_notestack;
@@ -168,8 +166,6 @@ Engine_Bline_Synth : CroneEngine {
 			notenum     = 60.0,
 			notevel     = 64.0,
 			waveform    = 0.0,
-			sublevel    = 0.0,	// Not yet implemented
-			slidetime   = 0.1,	// Not yet implemented
 			cutoff      = 0.229,
 			resonance   = 0.5,
 			envmod      = 0.25,
@@ -177,7 +173,8 @@ Engine_Bline_Synth : CroneEngine {
 			accent      = 0.5,
 			volume      = 1.0,
 			filtermorph = 0.0,
-			filterdrive = -1.0,	// Not yet implemented (not sure what range of values to use)
+			sublevel    = 0.0,	// Not yet implemented
+			slidetime   = 0.1,	// Not yet implemented
 			distortion	= 0.0,
 			pan         = 0.0;
 
@@ -203,7 +200,6 @@ Engine_Bline_Synth : CroneEngine {
 				accent:			accent,
 				volume:			volume,
 				filtermorph:	filtermorph,
-				filterdrive:	filterdrive
 			);
 			
 			// Resonance naive volume-compensation (replaced with compressor + limiter over entire output)
@@ -217,7 +213,7 @@ Engine_Bline_Synth : CroneEngine {
 			sig = Compander.ar(
 				in:				sig,
 				control:		sig,
-				thresh:			0.5,
+				thresh:			0.25,
 				slopeBelow:		1,
 				slopeAbove:		0.5,
 				clampTime:		0.01,

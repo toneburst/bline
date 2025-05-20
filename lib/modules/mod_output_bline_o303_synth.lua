@@ -17,7 +17,7 @@ local paramIDPrefix = "output_bline_open303_synth_"
 
 local BlineSynthO303 = {}
 
-BlineSynthO303.deviceName  = "Bline Open303 Synth"
+BlineSynthO303.deviceName  = "Open303 Synth"
 
 -- Debug mode toggle
 BlineSynthO303.debugMode = false
@@ -27,6 +27,9 @@ BlineSynthO303.debugMode = false
 -------------------------------------------------
 
 function BlineSynthO303.addParams()
+
+	-- Parameter resolution (number of steps between integer values)
+	local paramResolution = 5
 
 	print("Adding params")
 
@@ -40,9 +43,9 @@ function BlineSynthO303.addParams()
 			min = 0.0, -- the minimum value
 			max = 127.0, -- the maximum value
 			warp = 'lin', -- a shaping option for the raw value
-			step = 0.1, -- output value quantization
+			step = 0.2, -- output value quantization
 			default = 0.0, -- default value
-			quantum = 0.1, -- each delta will change raw value by this much
+			quantum = 1.0 / (127 * paramResolution), -- each delta will change raw value by this much
 			wrap = false -- wrap around on overflow (true) or clamp (false)
 		}
 	)
@@ -58,13 +61,13 @@ function BlineSynthO303.addParams()
 		paramIDPrefix .. "sub_level",
 		"Sub Level",
 		ControlSpec.def{
-			min = 0.0, -- the minimum value
-			max = 127.0, -- the maximum value
-			warp = 'lin', -- a shaping option for the raw value
-			step = 0.1, -- output value quantization
-			default = 0.0, -- default value
-			quantum = 0.1, -- each delta will change raw value by this much
-			wrap = false -- wrap around on overflow (true) or clamp (false)
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
 		}
 	)
 	params:set_action(
@@ -82,9 +85,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.01,
-			default = 30.0,
-			quantum = 0.01,
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
 			wrap = false
 		}
 	)
@@ -103,9 +106,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.01,
-			default = 64.0,
-			quantum = 0.01,
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * 5),
 			wrap = false
 		}
 	)
@@ -124,9 +127,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.1,
+			step = 0.2,
 			default = 0.0,
-			quantum = 0.1,
+			quantum = 1.0 / (127 * paramResolution),
 			wrap = false
 		}
 	)
@@ -145,9 +148,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.1,
-			default = 32.00,
-			quantum = 0.1,
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
 			wrap = false
 		}
 	)
@@ -166,9 +169,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.1,
-			default = 64.0,
-			quantum = 0.1,
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
 			wrap = false
 		}
 	)
@@ -187,9 +190,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.0,
-			default = 64.0,
-			quantum = 0.1,
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
 			wrap = false
 		}
 	)
@@ -208,9 +211,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.1,
-			default = 64.0,
-			quantum = 0.1,
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
 			wrap = false
 		}
 	)
@@ -229,9 +232,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.1,
+			step = 0.2,
 			default = 0.0,
-			quantum = 0.1,
+			quantum = 1.0 / (127 * paramResolution),
 			wrap = false
 		}
 	)
@@ -250,9 +253,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.1,
-			default = 127.0,
-			quantum = 0.1,
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
 			wrap = false
 		}
 	)
@@ -271,9 +274,9 @@ function BlineSynthO303.addParams()
 			min = 0.0,
 			max = 127.0,
 			warp = 'lin',
-			step = 0.1,
-			default = 64.0,
-			quantum = 0.1,
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
 			wrap = false
 		}
 	)

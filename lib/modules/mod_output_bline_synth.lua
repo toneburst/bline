@@ -26,6 +26,9 @@ BlineSynth.debugMode = false
 
 function BlineSynth.addParams()
 
+	-- Parameter resolution (number of steps between integer values)
+	local paramResolution = 5
+
 	print("Adding params")
 
     params:add_group(paramGroupName, 12)
@@ -34,7 +37,15 @@ function BlineSynth.addParams()
     params:add_control(
 		paramIDPrefix .. "waveform",
 		"Waveform",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0, -- the minimum value
+			max = 127.0, -- the maximum value
+			warp = 'lin', -- a shaping option for the raw value
+			step = 0.2, -- output value quantization
+			default = 0.0, -- default value
+			quantum = 1.0 / (127 * paramResolution), -- each delta will change raw value by this much
+			wrap = false -- wrap around on overflow (true) or clamp (false)
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "waveform",
@@ -47,7 +58,15 @@ function BlineSynth.addParams()
 	params:add_control(
 		paramIDPrefix .. "sub_level",
 		"Sub Level",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
 	params:set_action(
 		paramIDPrefix .. "sub_level",
@@ -60,7 +79,15 @@ function BlineSynth.addParams()
     params:add_control(
 		paramIDPrefix .. "cutoff",
 		"Filter Cutoff",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "cutoff",
@@ -73,7 +100,15 @@ function BlineSynth.addParams()
     params:add_control(
 		paramIDPrefix .. "resonance",
 		"Filter Resonance",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "resonance",
@@ -86,7 +121,15 @@ function BlineSynth.addParams()
     params:add_control(
 		paramIDPrefix .. "filter_overdrive",
 		"Filter Overdrive",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "filter_overdrive",
@@ -99,7 +142,15 @@ function BlineSynth.addParams()
     params:add_control(
 		paramIDPrefix .. "envelope",
 		"Filter Envelope",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "envelope",
@@ -112,7 +163,15 @@ function BlineSynth.addParams()
     params:add_control(
 		paramIDPrefix .. "decay",
 		"Envelope Decay",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "decay",
@@ -125,7 +184,15 @@ function BlineSynth.addParams()
     params:add_control(
 		paramIDPrefix .. "accent",
 		"Accent",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "accent",
@@ -138,7 +205,15 @@ function BlineSynth.addParams()
     params:add_control(
 		paramIDPrefix .. "slide_time",
 		"Slide Time",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "slide_time",
@@ -151,7 +226,15 @@ function BlineSynth.addParams()
 	params:add_control(
 		paramIDPrefix .. "distortion",
 		"Distortion",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "distortion",
@@ -164,7 +247,15 @@ function BlineSynth.addParams()
 	params:add_control(
 		paramIDPrefix .. "amp",
 		"Amp",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 0.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "amp",
@@ -177,7 +268,15 @@ function BlineSynth.addParams()
 	params:add_control(
 		paramIDPrefix .. "pan",
 		"Pan",
-		ControlSpec.new(0, 127, 'lin', 0, 127)
+		ControlSpec.def{
+			min = 0.0,
+			max = 127.0,
+			warp = 'lin',
+			step = 0.2,
+			default = 64.0,
+			quantum = 1.0 / (127 * paramResolution),
+			wrap = false
+		}
 	)
     params:set_action(
 		paramIDPrefix .. "pan",
