@@ -199,7 +199,7 @@ Engine_Bline_Synth : CroneEngine {
 				decay:			decay,
 				accent:			accent,
 				volume:			volume,
-				filtermorph:	filtermorph,
+				filtermorph:	filtermorph
 			);
 			
 			// Resonance naive volume-compensation (replaced with compressor + limiter over entire output)

@@ -15,6 +15,14 @@ Bline Quantiser Module
 local NornsUtils = require "lib.util"
 local TabUtil = require "lib.tabutil"
 local ControlSpec = require "controlspec"
+local TabUtil = require "lib.tabutil"
+
+------------------------------------------
+-- Local Vars ----------------------------
+------------------------------------------
+
+local paramIDPrefix = "quant_"
+local userScaleCount = 2 
 
 ------------------------------------------
 -- Scale Data Tables ---------------------
@@ -119,6 +127,9 @@ scales[21] = {0,1,1,3,4,5,5,7,8,8,10,10,12}
 scales[22] = {0,1,1,5,5,5,7,7,8,8,8,12,12}
 scales[23] = {0,1,1,3,3,7,7,8,8,8,12,12,12}
 scales[24] = {0,0,2,2,4,4,6,6,8,8,10,10,12}
+-- User scales (with default values)
+scales[25] = {0,1,2,3,4,5,6,7,8,9,10,11,12}
+scales[26] = {0,1,2,3,4,5,6,7,8,9,10,11,12}
 
 -- Scale names for param
 scale_names = {}
@@ -146,6 +157,8 @@ scale_names[21] = "Folkish"
 scale_names[22] = "Japanese"
 scale_names[23] = "Gamelan"
 scale_names[24] = "Whole Tone"
+scale_names[25] = "User 1"
+scale_names[26] = "User 2"
 
 -- Randomly shuffled note indices
 local shuffled_note_indices = {}
@@ -213,10 +226,10 @@ function Quantiser.addParams()
 
     print("Adding Quantiser parameters")
 
-    params:add_group("Bline Quantiser", 7)
+    params:add_group("Bline Quantiser", 7 + (userScaleCount * 12) + 2)
 
     -- Scale-select
-    params:add_option("quant_scale", "Scale", scale_names, 1)
+    params:add_option(paramIDPrefix .. "scale", "Scale", scale_names, 1)
     params:set_action(
 		"quant_scale",
 		function(x)
@@ -227,7 +240,7 @@ function Quantiser.addParams()
 
 	-- Shuffle note-lookup indices
 	params:add {
-		id = "quant_note_shuffled_indices",
+		id = paramIDPrefix .. "note_shuffled_indices",
 		name = "Note Scale Shuffle",
 		type = "number",
 		min = 1,
@@ -242,12 +255,12 @@ function Quantiser.addParams()
 
     -- Note scale-rotate
 	params:add_control (
-		"quant_note_scale_rotation",
+		paramIDPrefix .. "note_scale_rotation",
 		"Note Scale Rotate",
 		ControlSpec.new(0, 1, 'lin', 0.1, 0)
 	)
 	params:set_action (
-		"quant_note_scale_rotation",
+		paramIDPrefix .. "note_scale_rotation",
 		function(x)
 			Quantiser.noteScaleRotation = x * 2
 			Quantiser.createIndices()
@@ -257,12 +270,12 @@ function Quantiser.addParams()
 
 	-- Octave scale-rotate
 	params:add_control (
-		"quant_oct_scale_rotation",
+		paramIDPrefix .. "oct_scale_rotation",
 		"Octave Scale Rotate",
 		ControlSpec.new(0, 1, 'lin', 0.1, 0)
 	)
 	params:set_action (
-		"quant_oct_scale_rotation",
+		paramIDPrefix .. "oct_scale_rotation",
 		function(x)
 			Quantiser.octScaleRotation = x * 2
 			Quantiser.createIndices()
@@ -272,13 +285,13 @@ function Quantiser.addParams()
 
 	-- Scale preserve root note
 	params:add_option(
-		"quant_preserve_root",
+		paramIDPrefix .. "preserve_root",
 		"Preserve Root Note",
 		{"OFF", "ON"},
 		2
 	)
 	params:set_action(
-		"quant_preserve_root",
+		paramIDPrefix .. "preserve_root",
 		function(x)
 			Quantiser.noteScalePreserveBaseIndex = x
 			Quantiser.createIndices()
@@ -288,13 +301,13 @@ function Quantiser.addParams()
 
     -- Root-note select
     params:add_option(
-		"quant_root",
+		paramIDPrefix .. "root",
 		"Root Note",
 		rootnote_names,
 		7
 	)
     params:set_action(
-		"quant_root",
+		paramIDPrefix .. "root",
 		function(x)
 			Quantiser.state["root_note_name"] = rootnote_names[x]
 			--SCREEN_DIRTY = true
@@ -303,23 +316,86 @@ function Quantiser.addParams()
 
     -- Octave-shift
     params:add_option(
-		"quant_octave",
+		paramIDPrefix .. "octave",
 		"Octave",
 		{"-1", "0", "+1"},
 		2
 	)
     params:set_action(
-		"quant_octave",
+		paramIDPrefix .. "octave",
 		function(x)
 			Quantiser.baseOctave = x
 			--SCREEN_DIRTY = true
 		end
 	)
 
+	-- User scales
+
+	-- Loop through user scales 1 and 2
+	for i = 1, userScaleCount do
+		-- Add seperator
+		params:add_separator(
+			paramIDPrefix .. "user_scale_" .. i, 
+			"User Scale " .. i
+		)		
+		-- Add param for scale notes
+		for j = 1, 12 do
+   			params:add_option(
+				paramIDPrefix .. "user_scale_" .. i .. "_" .. j,
+				"User Scale " .. i .. " " .. note_names[j],
+				{"OFF", "ON"},
+				2
+			)
+			params:set_action(
+				paramIDPrefix .. "user_scale_" .. i .. "_" .. j,
+				function(x)
+					-- Set user scale i
+					Quantiser.buildUserScale(i)
+					--SCREEN_DIRTY = true
+				end
+			)
+		end
+	end
+	
 	-- Rebuild params table
 	_menu.rebuild_params()
 
 end -- End Quantiser.addParams()
+
+------------------------------------------
+-- Build User Scale
+------------------------------------------
+
+function Quantiser.buildUserScale(scale_index)
+
+	-- Last active note in scale (0 indexed!!)
+	-- Default value of 0 means root note will still play, even if all notes in scale set to OFF 
+	local lastActiveNote = 0
+
+	-- Find first (lowest) active note in scale
+	for i = 1, 12 do
+		-- Get param value
+		local val = params:get(paramIDPrefix .. "user_scale_" .. scale_index .. "_" .. i)
+		-- If ON, set last active note
+		if (val == 2) then
+			lastActiveNote = i - 1 -- Lua is 1-indexed, so subtract 1
+			break
+		end
+	end
+
+	-- Loop through note indices, building scale
+	for i = 1, 12 do
+		-- Get param value
+		local val = params:get(paramIDPrefix .. "user_scale_" .. scale_index .. "_" .. i)
+		-- If ON, update last active note
+		if (val == 2) then
+			lastActiveNote = i - 1 -- Lua is 1-indexed, so subtract 1
+		end
+		-- Update scale note with current note index (if current note active) or last active note (if not)
+		scales[24 + scale_index][i] = lastActiveNote
+	end
+
+end -- End Quantiser.buildUserScale()
 
 ------------------------------------------
 -- Change Active Scale
@@ -523,6 +599,12 @@ function Quantiser.init(debug)
 
     -- Add Quantiser params
     Quantiser.addParams()
+
+	-- Build user scales
+	-- Doesn't need to be explicitly called, as runs when user scale params are banged after being added
+	-- for i = 1, userScaleCount do
+	-- 	Quantiser.buildUserScale(i)
+	-- end
 
     if (debug) then
         Quantiser.debugMode = true
