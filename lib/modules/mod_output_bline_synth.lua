@@ -346,6 +346,8 @@ function BlineSynth.activate()
 	-- Rebuild params table
 	_menu.rebuild_params()
 
+	BlineSynth.allNotesOff()
+
 end -- End BlineSynth.activate()
 
 --------------------------------------------------

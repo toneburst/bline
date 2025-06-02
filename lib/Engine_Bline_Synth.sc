@@ -43,6 +43,19 @@ Engine_Bline_Synth : CroneEngine {
 	var p_o303_sublevel;
 	var p_o303_slidetime;
 
+	// Distortion params
+	var p_dist_tone;
+	var p_dist_drive;
+	var p_dist_mix;
+
+	// Chorus params
+	var p_chorus_rate;
+	var p_chorus_depth;
+	var p_chorus_mix;
+
+	// Bus to pass synth output to FX
+	var fx_bus;
+
 	// Note-stack array for OG Bline synth. Will contain frequencies of all currently-held keys
 	var bline_notestack;
 	
@@ -55,6 +68,9 @@ Engine_Bline_Synth : CroneEngine {
 	// Open303 synth instance
 	var o303synth;
 
+	// FX instances
+	var distortion, chorus, output;
+
 	*new { arg context, doneCallback;
 		^super.new(context, doneCallback);
 	}
@@ -63,6 +79,7 @@ Engine_Bline_Synth : CroneEngine {
 
 		pg = ParGroup.tail(context.xg);
 
+		fx_bus = Bus.audio(context.server, 2);
 		bline_notestack = List.new();
 		o303_notestack  = List.new();
 
@@ -72,7 +89,7 @@ Engine_Bline_Synth : CroneEngine {
 
 		// Define original Bline synth
 		SynthDef("BlineBass", {
-			arg out			=  0,
+			arg outbus,
 			gate			=  0,
 			velocity		=  0,
 			freq			=  440,
@@ -97,9 +114,7 @@ Engine_Bline_Synth : CroneEngine {
 			accamp			=  1.25,
 			accenvmod		=  750,
 			accdcy			=  0.3,
-			distortion		= -1,
-			volume			=  0.8,
-			pan				=  0;
+			volume			=  0.75;
 
 			// Declare synth internal vars
 			var sig, freqLagged, accentSwitch, ampEnv, vcfEnv, envmodAmt, finalCutoff, finalAmp;
@@ -152,16 +167,13 @@ Engine_Bline_Synth : CroneEngine {
 			// Filter oscillator
 			sig = RLPFD.ar(sig, finalCutoff, resonance, filterdrive, mul:1.5);
 
-			// Distortion (with naive volume-compensation)
-			sig = (sig * linexp(distortion, -1, 1, 1, 30)).distort * distortion.linexp(-1, 1, 1, 0.15);
-
 			// Output
-			Out.ar(out, Pan2.ar(sig, pan, finalAmp));
+			Out.ar(outbus, [sig, sig], finalAmp);
 		}).add;
 
 		// Define Open303 Synth
 		SynthDef("Open303Bass", {
-			arg out		= 0,
+			arg outbus,
 			gate        = 0.0,
 			notenum     = 60.0,
 			notevel     = 64.0,
@@ -171,12 +183,11 @@ Engine_Bline_Synth : CroneEngine {
 			envmod      = 0.25,
 			decay       = 0.5,
 			accent      = 0.5,
-			volume      = 1.0,
+			volume      = 0.75,
+			// Additional (non 303-original) params
 			filtermorph = 0.0,
 			sublevel    = 0.0,	// Not yet implemented
-			slidetime   = 0.1,	// Not yet implemented
-			distortion	= 0.0,
-			pan         = 0.0;
+			slidetime   = 0.1;	// Not yet implemented
 
 			// Declare synth internal vars
 
@@ -205,10 +216,129 @@ Engine_Bline_Synth : CroneEngine {
 			// Resonance naive volume-compensation (replaced with compressor + limiter over entire output)
 			//sig = sig * resonance.linexp(1, 0, 1, 0.25);
 			
-			// Add distortion with naive volume-compensation
-			// TODO: Replace with analog-style distortion using plugin
-			sig = (sig * linexp(distortion, -1, 1, 1, 30)).distort * distortion.linexp(-1, 1, 1, 0.15);
-			
+			// Final output
+			Out.ar(outbus, [sig, sig], 1.0);
+
+		}).add;
+
+		// Define Distortion FX
+		SynthDef.new("FXDistortion", {
+			arg inbus,
+			type          = 0,
+			distdrive     = 0.5,
+			disttone      = 0.5,
+			res           = 0.1,
+			noise         = 0.0003,
+			fxmix         = 1.0,
+			outbus;
+
+			var freq, filtertype, sig, wet;
+
+			// Dry input from bus
+			sig = In.ar(inbus, 1);
+
+			// Adapted from overdrive and distortion FX by 21echoes:
+			// https://github.com/21echoes/pedalboard/tree/master
+
+			// Wet signal. First we feed into a HPF to filter out sub-20Hz
+			wet = HPF.ar(sig, 25);
+
+			// ...then we feed into selectable overdrive/distortion
+			wet = Select.ar(type > 0.5, [
+				// Drive controls 1 to 5x the volume with soft-clipping
+				(wet * LinLin.kr(distdrive, 0, 1, 1, 5)).softclip,
+				// Drive controls 1 to 5x the volume with hard-clipping
+				(wet * LinExp.kr(distdrive, 0, 1, 1, 5)).distort
+			]);
+
+			// ...then into the Tone section
+			// Tone controls a MMF, exponentially ranging from 10 Hz - 21 kHz
+			// Tone above 0.75 switches to a HPF
+			freq = Select.kr(disttone > 0.75, [
+				Select.kr(disttone > 0.2, [
+					LinExp.kr(disttone, 0, 0.2, 10, 400),
+					LinExp.kr(disttone, 0.2, 0.75, 400, 20000),
+				]),
+				LinExp.kr(disttone, 0.75, 1, 20, 21000),
+			]);
+
+			// ...finally we feed the signal into the filter section
+			// Switch filter-type
+			filtertype = Select.kr(disttone > 0.75, [0, 1]);
+			wet = DFM1.ar(
+				in:          wet,
+				freq:        freq,
+				res:         res,
+				inputgain:   1.0,
+				type:        filtertype,
+				noiselevel:  noise
+			).softclip;
+
+			// Naive level-compensation
+			wet = LinLin.ar(distdrive, 0, 1, 0.5, 0.25) * wet;
+
+			// Wet/dry mix distorted and dry signals
+			sig = XFade2.ar(sig, wet, fxmix);
+
+			Out.ar(outbus, [sig, sig]);
+		}).add;
+
+		// Define Chorus FX
+		SynthDef.new("FXChorus", {
+			arg inbus,
+			chorusrate      = 0.5,
+			chorusdepth     = 0.5,
+			chorusphasediff = 0.9,
+			fxmix           = 0.5,
+			outbus;
+
+			var numdelays = 4, lfos, rate, depth, maxdelaytime, mindelaytime, sig, wet;
+
+			// Dry input from bus
+			sig = In.ar(inbus, 1);
+
+			// Adapted from chorus FX by 21echoes:
+			// https://github.com/21echoes/pedalboard/tree/master
+
+			rate = chorusrate;
+			rate = Select.kr(rate > 0.5, [
+				LinExp.kr(rate, 0.0, 0.5, 0.025, 0.125),
+				LinExp.kr(rate, 0.5, 1.0, 0.125, 2)
+			]);
+
+			depth = chorusdepth;
+			maxdelaytime = LinLin.kr(depth, 0.0, 1.0, 0.016, 0.052);
+			mindelaytime = LinLin.kr(depth, 0.0, 1.0, 0.012, 0.022);
+
+			wet = sig * numdelays.reciprocal;
+			lfos = Array.fill(numdelays, {|i|
+				LFPar.kr(
+					rate * {rrand(0.95, 1.05)},
+					chorusphasediff * i,
+					(maxdelaytime - mindelaytime) * 0.5,
+					(maxdelaytime + mindelaytime) * 0.5,
+				)
+			});
+			wet = DelayC.ar(wet, (maxdelaytime * 2), lfos).sum;
+
+			sig = XFade2.ar(sig, wet, fxmix);
+
+			Out.ar(outbus, [sig, sig], 1.0);
+
+		}).add;
+
+		// Define Output FX
+		SynthDef.new("FXOutput", {
+			arg inbus,
+			pan			= 0,
+			volume		= 1.0,
+			out			= 0;
+
+			var sig;
+
+			// Dry input from bus
+			sig = In.ar(inbus, 1);
+
 			// Add Compressor
 			sig = Compander.ar(
 				in:				sig,
@@ -221,16 +351,27 @@ Engine_Bline_Synth : CroneEngine {
 			);
 			
 			// Add limiter
-			sig = Limiter.ar(sig, 0.9, 0.01);
-			
-			// Final output
-			Out.ar(out, Pan2.ar(sig, pan, 1.0));
+			sig = Limiter.ar(
+				in:				sig,
+				level:			0.9,
+				dur:			0.01	// Lookahead time (ms)
+			);
 
+			// Pass signal to final output, with volume and pan control
+			Out.ar(out, Pan2.ar(sig, pan, volume));
 		}).add;
 
 		// Sync server
 		// See: https://llllllll.co/t/supercollider-engine-failure-in-server-error/53051
 		Server.default.sync;
+
+		//////////////////
+		// Setup FX Bus //
+		//////////////////
+
+		// Create FX bus
+		// Bus is Stereo. Our synths and FX are mono currently, so we will copy the signal to both channels at the output stage of each synth/FX
+		fx_bus = Bus.audio(context.server, 2);
 
 		////////////////////////
 		// Instantiate Synths //
@@ -238,9 +379,23 @@ Engine_Bline_Synth : CroneEngine {
 
 		// OG synth
 		blinesynth = Synth("BlineBass");
+		blinesynth.set(\outbus, fx_bus);
 
 		// Open303 synth
-		o303synth = Synth("Open303Bass");
+		o303synth = Synth.after(blinesynth, "Open303Bass");
+		o303synth.set(\outbus, fx_bus);
+
+		// Add Distortion FX
+		distortion = Synth.after(o303synth, "FXDistortion");
+		distortion.set(\inbus, fx_bus, \outbus, fx_bus);
+
+		// Add Chorus FX
+		chorus = Synth.after(distortion, "FXChorus");
+		chorus.set(\inbus, fx_bus, \outbus, fx_bus);
+
+		// Add Output
+		output = Synth.after(chorus, "FXOutput");
+		output.set(\inbus, fx_bus, \out, 0);
 
 		///////////////////////
 		// OG Synth Commands //
@@ -319,8 +474,8 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("distortion", "f", { arg msg;
-			p_bline_distortion = msg[1].linlin(0, 127, -1, 1);
-			blinesynth.set(\distortion, p_bline_distortion);
+			//p_bline_distortion = msg[1].linlin(0, 127, -1, 1);
+			//blinesynth.set(\distortion, p_bline_distortion);
 		});
 
 		this.addCommand("slide_time", "f", { arg msg;
@@ -329,13 +484,13 @@ Engine_Bline_Synth : CroneEngine {
 		});
 
 		this.addCommand("volume", "f", { arg msg;
-			p_bline_volume = msg[1].linlin(0, 127, 0, 1);
-			blinesynth.set(\volume, p_bline_volume);
+			//p_bline_volume = msg[1].linlin(0, 127, 0, 1);
+			//blinesynth.set(\volume, p_bline_volume);
 		});
 
 		this.addCommand("pan", "f", { arg msg;
-			p_bline_pan = msg[1].linlin(0, 127, -1, 1);
-			blinesynth.set(\pan, p_bline_pan);
+			//p_bline_pan = msg[1].linlin(0, 127, -1, 1);
+			//blinesynth.set(\pan, p_bline_pan);
 		});
 
 		////////////////////////////
@@ -422,7 +577,7 @@ Engine_Bline_Synth : CroneEngine {
 
 		this.addCommand("o303_distortion", "f", { arg msg;
 			p_o303_distortion = msg[1].linlin(0, 127, -1, 1);
-			o303synth.set(\distortion, p_o303_distortion);
+			//o303synth.set(\distortion, p_o303_distortion);
 		});
 
 		this.addCommand("o303_slide_time", "f", { arg msg;
@@ -437,7 +592,7 @@ Engine_Bline_Synth : CroneEngine {
 
 		this.addCommand("o303_pan", "f", { arg msg;
 			p_o303_pan = msg[1].linlin(0, 127, -1, 1);
-			o303synth.set(\pan, p_o303_pan);
+			//o303synth.set(\pan, p_o303_pan);
 		});
 
 	} // end alloc

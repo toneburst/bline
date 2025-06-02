@@ -79,31 +79,9 @@ note_transpose_amt[13] =  6
 -- Scale tables
 -- Sourced from MI MIDIPal firmware by @Pichenettes)
 -- https://github.com/pichenettes/midipal
+-- NOTE: scales are 0-indexed, so C = 0, C# = 1, D = 2, etc.
 local scales = {}
-scales[1] = {0,1,2,3,4,5,6,7,8,9,10,11,12}
--- scales[2] = {0,0,2,2,4,5,5,7,7,9,9,11,12}
--- scales[3] = {0,0,2,3,3,5,5,7,7,10,10,10,12}
--- scales[4] = {0,1,1,3,3,5,5,7,8,8,10,10,12}
--- scales[5] = {0,0,2,2,4,4,6,7,7,9,11,11,12}
--- scales[6] = {0,0,2,2,4,5,5,7,7,9,10,10,12}
--- scales[7] = {0,0,2,3,3,5,5,7,8,8,10,10,12}
--- scales[8] = {0,1,1,3,3,5,6,6,8,8,10,10,12}
--- scales[9] = {0,0,3,3,4,4,7,7,7,9,10,10,12}
--- scales[10] = {0,0,3,3,3,5,6,7,7,10,10,10,12}
--- scales[11] = {0,0,2,2,4,4,7,7,7,9,9,9,12}
--- scales[12] = {0,0,3,3,3,5,5,7,7,10,10,10,12}
--- scales[13] = {0,1,1,4,4,5,5,7,8,8,11,11,12}
--- scales[14] = {0,1,1,4,4,4,6,7,8,8,11,11,12}
--- scales[15] = {0,1,1,3,3,5,5,7,7,10,10,11,12}
--- scales[16] = {0,1,1,3,3,6,6,7,8,8,11,11,12}
--- scales[17] = {0,0,2,2,4,5,5,5,9,9,10,11,12}
--- scales[18] = {0,0,2,2,5,5,5,7,7,9,9,9,12}
--- scales[19] = {0,0,3,3,3,5,5,8,8,8,10,10,12}
--- scales[20] = {0,0,3,3,4,4,6,6,8,8,10,10,12}
--- scales[21] = {0,1,1,3,4,5,5,7,8,8,10,10,12}
--- scales[22] = {0,1,1,1,5,5,5,7,8,8,8,8,12}
--- scales[23] = {0,1,1,3,3,3,7,7,8,8,8,8,12}
--- scales[24] = {0,0,2,2,4,4,6,6,8,8,10,10,12}
+scales[1]  = {0,1,2,3,4,5,6,7,8,9,10,11,12}
 scales[2]  = {0,0,2,2,4,5,5,7,7,9,9,11,12}
 scales[3]  = {0,0,2,3,3,5,5,7,7,10,10,12,12}
 scales[4]  = {0,1,1,3,3,5,5,7,8,8,10,10,12}
@@ -160,7 +138,7 @@ scale_names[24] = "Whole Tone"
 scale_names[25] = "User 1"
 scale_names[26] = "User 2"
 
--- Randomly shuffled note indices
+-- Randomly shuffled note indices for pattern variations
 local shuffled_note_indices = {}
 shuffled_note_indices[1]  = {1,2,3,4,5,6,7,8,9,10,11,12,13}
 shuffled_note_indices[2]  = {12,1,10,13,3,9,7,8,5,4,11,6,2}
@@ -187,11 +165,11 @@ local Quantiser = {}
 
 -- Quantiser state
 Quantiser.state = {
-    scale_name = "Chromatic",
-	root_note_name = "C",
-    last_note_name = "C",
-    last_note_index = 1,
-    last_octave_index = 1,
+    scale_name            = "Chromatic",
+	root_note_name        = "C",
+    last_note_name        = "C",
+    last_note_index       = 1,
+    last_octave_index     = 1,
     last_octave_indicator = " "
 }
 
