@@ -189,6 +189,9 @@ function MIDIOutBasic.activate()
 	-- Rebuild params table
 	_menu.rebuild_params()
 
+	-- Disable audio output of both builtin synths
+	engine.source_select(1)
+
 end -- End MIDIOutBasic.activate()
 
 --------------------------------------------------

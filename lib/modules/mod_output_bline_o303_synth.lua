@@ -348,6 +348,9 @@ function BlineSynthO303.activate()
 	-- Rebuild params table
 	_menu.rebuild_params()
 
+	-- Enable audio output of Open303 synth
+	engine.source_select(3)
+
 end -- End BlineSynthO303.activate()
 
 --------------------------------------------------

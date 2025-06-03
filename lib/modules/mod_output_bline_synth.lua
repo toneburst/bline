@@ -348,6 +348,9 @@ function BlineSynth.activate()
 
 	BlineSynth.allNotesOff()
 
+	-- Enable audio output of Bline synth
+	engine.source_select(2)
+
 end -- End BlineSynth.activate()
 
 --------------------------------------------------
