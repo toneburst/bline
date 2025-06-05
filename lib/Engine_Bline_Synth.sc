@@ -46,7 +46,7 @@ Engine_Bline_Synth : CroneEngine {
 
 		// Define original Bline synth
 		SynthDef("BlineBass", {
-			arg enabled     =  0,
+			arg enable      = 0,
 			outbus          =  0,
 			gate			=  0,
 			velocity		=  0,
@@ -119,20 +119,21 @@ Engine_Bline_Synth : CroneEngine {
 
 			// Amp unaccented/accented (add VCF envelope to AMP env on accented notes)
 			finalAmp = (ampEnv + (accentSwitch * (vcfEnv * accamp)));
+			
 			// Scale to amp param. Naive resonance volume compensation (seems to work OK though)
 			finalAmp = finalAmp * resonance.linlin(0.1, 0.8, 0.7 * volume, volume);
 
 			// Filter oscillator
 			sig = RLPFD.ar(sig, finalCutoff, resonance, filterdrive, mul:1.5);
 
-			// Output (send to LEFT channel of FX bus)
-			Out.ar(outbus, sig, finalAmp * enabled);
+			// Output
+			Out.ar(outbus, (sig * finalAmp) * enable);
 		}).add;
 
 		// Define Open303 Synth
 		SynthDef("Open303Bass", {
-			arg enabled = 0,
-			outbus  	= 0,
+			arg enable  = 0,
+			outbus      = 0,
 			gate        = 0.0,
 			notenum     = 60.0,
 			notevel     = 64.0,
@@ -176,7 +177,7 @@ Engine_Bline_Synth : CroneEngine {
 			sig = sig * resonance.linexp(1, 0, 1, 0.25);
 			
 			// Output (send to RIGHT channel of FX bus)
-			Out.ar(outbus, sig, enabled);
+			Out.ar(outbus, sig * enable);
 
 		}).add;
 
@@ -187,8 +188,8 @@ Engine_Bline_Synth : CroneEngine {
 			distdrive     = 0.5,
 			disttone      = 0.5,
 			res           = 0.1,
-			noise         = 0.0003,
-			fxmix         = 1.0,
+			noise         = 0.0005,
+			fxmix         = 0.5,
 			outbus        = 0;
 
 			var freq, filtertype, sig, wet;
@@ -284,7 +285,7 @@ Engine_Bline_Synth : CroneEngine {
 
 			sig = XFade2.ar(sig, wet, fxmix);
 
-			Out.ar(outbus, sig, 1.0);
+			Out.ar(outbus, sig);
 
 		}).add;
 
@@ -293,7 +294,7 @@ Engine_Bline_Synth : CroneEngine {
 			arg inbus   = 0,
 			pan			= 0,
 			volume		= 1.0,
-			out			= 0;
+			outbus	    = 0;
 
 			var sig;
 
@@ -315,11 +316,11 @@ Engine_Bline_Synth : CroneEngine {
 			sig = Limiter.ar(
 				in:				sig,
 				level:			0.9,
-				dur:			0.01	// Lookahead time (ms)
+				dur:			0.5	// Lookahead time (ms)
 			);
 
 			// Pass signal to final output, with volume and pan control
-			Out.ar(out, Pan2.ar(sig, pan, volume));
+			Out.ar(outbus, Pan2.ar(sig, pan, volume));
 		}).add;
 
 		// Sync server
@@ -354,9 +355,9 @@ Engine_Bline_Synth : CroneEngine {
 		chorus = Synth.after(distortion, "FXChorus", target:pg);
 		chorus.set("inbus", fx_bus, "outbus", fx_bus);
 
-		// Add Output
+		// Add Output (end of chain)
 		output = Synth.after(chorus, "FXOutput", target:pg);
-		output.set("inbus", fx_bus, "out", 0);
+		output.set("inbus", fx_bus, "outbus", 0);
 
 		//////////////////
 		// Select Synth //
@@ -366,8 +367,8 @@ Engine_Bline_Synth : CroneEngine {
 		// 1 = both off, 2 = Bline, 3 = Open303
 		this.addCommand("source_select", "i", { arg msg;
 			var src = msg[1];
-			if( src == 2 ) { blinesynth.set("enabled", 1); } { blinesynth.set("enabled", 0) };
-			if( src == 3 ) {  o303synth.set("enabled", 1); } {  o303synth.set("enabled", 0) };
+			if( src == 2 ) { blinesynth.set("enable", 1); } { blinesynth.set("enable", 0) };
+			if( src == 3 ) {  o303synth.set("enable", 1); } {  o303synth.set("enable", 0) };
 		});
 
 		///////////////////////
@@ -382,12 +383,12 @@ Engine_Bline_Synth : CroneEngine {
 			// If note-stack size is now 1, this is a non-legato note
 			if(bline_notestack.size == 1) {
 				// Non-Legato note
-				blinesynth.set("gate", 1, "velocity", msg[2]/127, "slidetime", 0);
+				blinesynth.set("slidetime", 0);
 			} {
 				// ...else this is a legato note
 				blinesynth.set("slidetime", p_bline_slidetime);
 			};
-			blinesynth.set("freq", freq);
+			blinesynth.set("gate", 1, "freq", freq, "velocity", msg[2]/127);
 		});
 
 		this.addCommand("note_off", "i", { arg msg;
@@ -397,10 +398,10 @@ Engine_Bline_Synth : CroneEngine {
 			// Check if this we've just released the last held note
 			if (bline_notestack.size == 0) {
 				// ...we have. Pull gate low and send note index to synth (velocity not required). Synth will release note
-				blinesynth.set("freq", freq, "slidetime", 0, "gate", 0);
+				blinesynth.set("gate", 0, "freq", freq, "slidetime", 0);
 			} {
 				// Notes still held. Update synth with most recent note index remaining in note-stack. Synth will slide back to note
-				blinesynth.set("freq", bline_notestack.last, "slidetime", p_bline_slidetime);
+				blinesynth.set("gate", 1, "freq", bline_notestack.last, "slidetime", p_bline_slidetime);
 			};
 		});
 
