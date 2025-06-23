@@ -146,9 +146,14 @@ UI.currentParams = page_params[1]
 UI.pageDrawX = 80
 UI.pageDrawY = 12
 
+-- Page Background image buffer
+UI.background = screen.load_png("/home/we/dust/code/bline/lib/ui/png/ui-bg.png")
+UI.backgroundXOffset = 0
+
 -- Flags
 UI.doneSplash = false
 UI.debugMode = false
+UI.displayMode = 1 		-- 1 = normal, 2 = inverted
 
 --[[
 
@@ -186,33 +191,65 @@ current_step_state {
 -- https://monome.org/docs/norns/api/modules/screen.html
 
 ------------------------------------------
+-- Get screen level ----------------------
+------------------------------------------
+
+local function getScreenLevel(index)
+	if (UI.displayMode == 1) then
+		-- Standard mode
+		return index
+	else
+		-- Inverted mode
+		return 15 - index
+	end
+end -- End getScreenLevel()
+
+------------------------------------------
+-- Draw Page Background ------------------
+------------------------------------------
+
+local function drawPageBG()
+
+	-- Draw background image
+	-- Background elements now part of background image
+	if (UI.pageIndex == 1) then
+		-- Draw page 1 background (vertical offset 0px)
+		-- display_image_region(image, left, top, width, height, x, y)
+		screen.display_image_region(UI.background, UI.backgroundXOffset, 0, 128, 64, 0, 0)
+	else
+		-- Draw other page background	
+		if (UI.controlIndex == 1) then
+			-- Top row params selected (vertical offset 64px)
+			screen.display_image_region(UI.background, UI.backgroundXOffset, 64, 128, 64, 0, 0)
+		else
+			-- Bottom row params selected (vertical offset 128px)
+			screen.display_image_region(UI.background, UI.backgroundXOffset, 128, 128, 64, 0, 0)
+		end
+	end
+
+end -- End drawPageBG()
+
+------------------------------------------
+-- Draw BPM ------------------------------
+------------------------------------------
+
+local function drawBPM()
+
+	screen.move(125,6)
+	screen.level(getScreenLevel(0))
+	screen.text_right(params:get("clock_tempo") .. "bpm")
+	screen.fill()
+
+end -- End drawBPM()
+
+------------------------------------------
 -- Draw Top-Bar Graphics -----------------
 ------------------------------------------
 
 local function drawTitleBar()
 
-	-- Draw bar
-	screen.level(10)
-	screen.line_width(8)
-	screen.move(0,3)
-	screen.line(127,3)
-	screen.close()
-    screen.stroke()
-	screen.fill()
-
-	screen.font_face(1)
-	screen.font_size(8)
-
-	-- Draw Title
-	screen.level(0)
-	screen.move(2,6)
-	screen.text("bLINE")
-	screen.fill()
-
-	-- Draw bpm
-	screen.move(125,6)
-	screen.text_right(params:get("clock_tempo") .. "bpm")
-	screen.fill()
+	-- Draw BPM (other top-bar items now part of background image)
+	drawBPM()
 
 end -- End drawTitleBar()
 
@@ -226,7 +263,7 @@ local function drawCrossHairs(draw_x, draw_y, x_pos, y_pos)
 	local py = math.floor(math.min(y_pos, 3.8) * 10) + 3
 
 	-- Draw crosshairs using "+" character
-	screen.level(15)
+	screen.level(getScreenLevel(15))
 	screen.move(draw_x + px, draw_y + py)
 	screen.font_face(1)
 	screen.font_size(8)
@@ -242,38 +279,38 @@ end -- End drawCrossHair(x_pos, y_pos)
 local function drawNoteInfo(note_data, draw_x, draw_y)
 
 	screen.move(draw_x, draw_y)
-	screen.level(10)
+	screen.level(getScreenLevel(10))
 	screen.font_face(1)
 	screen.font_size(8)
 	screen.text(note_data["last_octave_indicator"] .. note_data["last_note_name"])
 	screen.fill()
 
-	-- Add Accent
-	screen.move(draw_x + 18, draw_y)
-	screen.level(3)
+	-- Add accent / slide / rest indicators
+	-- We only need to draw text for active steps, as inactive indicators are now part of the background image
+
+	-- Add Accent indicator
 	if(note_data["accent"]) then
-		screen.level(15)
+		screen.move(draw_x + 18, draw_y)
+		screen.level(getScreenLevel(15))
+		screen.text("a")
+		screen.fill()
 	end
-	screen.text("a")
-	screen.fill()
 
-	-- Add Slide
-	screen.move(draw_x + 28, draw_y)
-	screen.level(3)
+	-- Add Slide indicator
 	if(note_data["slide"]) then
-		screen.level(15)
+		screen.move(draw_x + 28, draw_y)
+		screen.level(getScreenLevel(15))
+		screen.text("s")
+		screen.fill()
 	end
-	screen.text("s")
-	screen.fill()
 
-	-- Add Rest
-	screen.move(draw_x + 38, draw_y)
-	screen.level(3)
+	-- Add Rest indicator
 	if(note_data["rest"]) then
-		screen.level(15)
+		screen.move(draw_x + 38, draw_y)
+		screen.level(getScreenLevel(15))
+		screen.text("r")
+		screen.fill()
 	end
-	screen.text("r")
-	screen.fill()
 
 end -- End drawNoteInfo(note_data, draw_x, draw_y)
 
@@ -283,7 +320,7 @@ end -- End drawNoteInfo(note_data, draw_x, draw_y)
 
 local function drawPageTitle(str)
 
-	screen.level(10)
+	screen.level(getScreenLevel(10))
 	screen.font_face(1)
 	screen.font_size(8)
 	screen.text_rotate (123, 12, str, 90)
@@ -292,71 +329,32 @@ local function drawPageTitle(str)
 end -- End drawPageTitle(str)
 
 ------------------------------------------
--- Draw Param Modal ----------------------
-------------------------------------------
-
--- local function drawParamModal()
---
--- end -- End drawParamModal()
-
-------------------------------------------
--- Draw Page Frame -----------------------
-------------------------------------------
-
-local function drawPageFrame(draw_x, draw_y)
-
-	-- Draw page frame
-	screen.level(6)
-	screen.line_width(1)
-	-- screen.rect (x, y, w, h)
-	screen.rect(draw_x - 1, draw_y - 1, 42, 42)
-	screen.stroke()
-
-end -- End drawPageFrame()
-
-------------------------------------------
 -- Draw Page -----------------------------
 ------------------------------------------
 
--- Draw all pages except first
+-- Draw all pages EXCEPT page 1
 local function drawPage(draw_x, draw_y)
 
-	local top_bg_level, top_text_level, bottom_bg_level, bottom_text_level
-
-	-- Draw page frame
-	drawPageFrame(draw_x, draw_y)
+	local top_text_level, bottom_text_level
 
 	drawPageTitle(UI.currentParams["pageName"])
 
+	-- Set font params
 	screen.font_face(1)
 	screen.font_size(8)
 
-	-- Draw top row background ---------------
-
-	-- Set background colour top row
+	-- Set levels
 	if (UI.controlIndex == 1) then
-		top_bg_level = 4
 		top_text_level = 15
-		bottom_bg_level = 2
 		bottom_text_level = 7
 	else
-		top_bg_level = 2
 		top_text_level = 7
-		bottom_bg_level = 4
 		bottom_text_level = 15
 	end
 
-	screen.level(top_bg_level)
+	-- Draw top row params
 
-	screen.rect(draw_x, draw_y, 19, 19)
-	screen.close()
-	screen.fill()
-
-	screen.rect(draw_x + 20, draw_y, 19, 19)
-	screen.close()
-	screen.fill()
-
-	screen.level(top_text_level)
+	screen.level(getScreenLevel(top_text_level))
 
 	screen.move(draw_x + 9, draw_y + 6)
 	screen.text_center(UI.currentParams[1][1]["label"])
@@ -374,19 +372,9 @@ local function drawPage(draw_x, draw_y)
 	screen.text_center(UI.currentParams[1][2].val())
 	screen.fill()
 
-	-- Draw bottom row background --------
+	-- Draw bottom row params
 
-	screen.level(bottom_bg_level)
-
-	screen.rect(draw_x, draw_y + 20, 19, 19)
-	screen.close()
-	screen.fill()
-
-	screen.rect(draw_x + 20, draw_y + 20, 19, 19)
-	screen.close()
-	screen.fill()
-
-	screen.level(bottom_text_level)
+	screen.level(getScreenLevel(bottom_text_level))
 
 	screen.move(draw_x + 9, draw_y + 27)
 	screen.text_center(UI.currentParams[2][1]["label"])
@@ -441,20 +429,15 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 	local bar_top = 6
 	local bar_top_highlight = 15
 
-	-- Draw label
-	screen.move(label_x, label_y)
-	screen.font_face(1)
-	screen.font_size(8)
-
-	-- Highlight label on first step of pattern
+	-- Draw highlighted label if this is first step of pattern (non-hightlighted labels are now part of background image)
 	if((step_index - pattern_index_offset) == 1) then
-		screen.level(15)
-	else
-		screen.level(3)
+		screen.move(label_x, label_y)
+		screen.font_face(1)
+		screen.font_size(8)
+		screen.level(getScreenLevel(15))
+		screen.text_center(label)
+		screen.fill()
 	end
-
-	screen.text_center(label)
-	screen.fill()
 
 	-- Draw pattern
 	screen.line_width(bar_width)
@@ -492,7 +475,7 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 		end
 
 		-- Draw bar top
-		screen.level(top)
+		screen.level(getScreenLevel(top))
 		screen.move(x, graph_y)
 		screen.line_rel(0, -(v + 1))
 		screen.close()
@@ -509,17 +492,15 @@ local function drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre
 
 	end
 
-	-- Draw fraaze lock
+	-- Draw freeze lock if lock enabled (disabled lock graphic is now part of background image, so no need to draw it again)
 	if(pattern_frozen == 1) then
 		screen.display_png("/home/we/dust/code/bline/lib/ui/png/padlock-bright.png", 71, graph_y - 8)
-	else
-		screen.display_png("/home/we/dust/code/bline/lib/ui/png/padlock-dim.png", 71, graph_y - 8)
 	end
 
 end -- End drawPattern(pattern_data, label, bar_width, y_pos, pre_scale, pre_offset, type)
 
 ------------------------------------------
--- XY Page -------------------------------
+-- Draw XY Page (page 1) -----------------
 ------------------------------------------
 
 local function drawPageXY(draw_x, draw_y, x_pos, y_pos)
@@ -530,24 +511,9 @@ local function drawPageXY(draw_x, draw_y, x_pos, y_pos)
 	local cell_x = math.min(math.floor(x), 3) * 10
 	local cell_y = math.min(math.floor(y), 3) * 10
 
-	-- Draw page frame
-	drawPageFrame(draw_x, draw_y)
-
-	screen.level(2)
-
-	-- Draw background cell rects
-	for row = 0, 30, 10
-	do
-		for col = 0, 30, 10
-		do
-			screen.rect(draw_x + col, draw_y + row, 9, 9)
-			screen.close()
-			screen.fill()
-		end
-	end
-
 	-- Draw current cell rect
-	screen.level(4)
+	-- We no longer need to draw the other background cell rects, as they are part of the background image
+	screen.level(getScreenLevel(4))
 	screen.rect(cell_x + draw_x, cell_y + draw_y, 9, 9)
 	screen.close()
 	screen.fill()
@@ -580,6 +546,26 @@ function UI.playSplash()
 end -- End UI.playSplash()
 
 ------------------------------------------
+-- Set UI Mode ---------------------------
+------------------------------------------
+
+function UI.setUIMode(mode)
+
+	-- UI mode (normal/inverted) select
+	UI.displayMode = mode
+
+	-- Set background image X offset based on mode
+	if (mode == 1) then
+		-- Set background image X offset to 0 (normal mode)
+		UI.backgroundXOffset = 0
+	else
+		-- Set background image X offset to 128 (inverted mode)
+		UI.backgroundXOffset = 128
+	end
+
+end -- End UI.setUIMode(mode)
+
+------------------------------------------
 -- Redraw Function -----------------------
 ------------------------------------------
 
@@ -587,7 +573,6 @@ function UI.redraw(channel_states, step_state)
 
 	-- Play splash animation if flag set
 	if (splash_playing == true) then
-
 		UI.playSplash()
 
 	else
@@ -596,28 +581,35 @@ function UI.redraw(channel_states, step_state)
 		UI.channelStates = channel_states
 		UI.stepState = step_state
 
-		-- Enable anti-aliasing
+		-- Disable anti-aliasing
 	    screen.aa(0)
+
+		-- Clear screen
 		screen.clear()
 
-		-- Draw titlebar
+		-- Draw page background
+		drawPageBG()
+
+		-- Draw title bar
 		drawTitleBar()
 
 		-- Draw Notes channel graph
 		-- Args: (channel, label, bar_width, y_pos, pre_scale, pre_offset, type)
-		drawPattern(UI.channelStates["notes"], "n", 3, 0, 1, 0, "val")
-		drawPattern(UI.channelStates["octaves"], "o", 3, 11, 2, -1, "val")
-		drawPattern(UI.channelStates["accents"], "a", 3, 21, 6, 1, "bool")
-		drawPattern(UI.channelStates["slides"], "s", 3, 31, 6, 1, "bool")
-		drawPattern(UI.channelStates["rests"], "r", 3, 41, 6, 1, "bool")
+		drawPattern(UI.channelStates["notes"],   "n", 3,  0, 1,  0, "val" )
+		drawPattern(UI.channelStates["octaves"], "o", 3, 11, 2, -1, "val" )
+		drawPattern(UI.channelStates["accents"], "a", 3, 21, 6,  1, "bool")
+		drawPattern(UI.channelStates["slides"],  "s", 3, 31, 6,  1, "bool")
+		drawPattern(UI.channelStates["rests"],   "r", 3, 41, 6,  1, "bool")
 
 		-- Draw Pages
 		if (UI.pageIndex == 1) then
+			-- Draw XY page (page 1)
 			drawPageXY(UI.pageDrawX, UI.pageDrawY,
 				params:get(page_params[1][1][1]["param"]),
 				params:get(page_params[1][1][2]["param"])
 			)
 		else
+			-- Draw other pages
 			drawPage(UI.pageDrawX, UI.pageDrawY)
 		end
 
@@ -628,6 +620,7 @@ function UI.redraw(channel_states, step_state)
 
 	end -- End if (splash_playing == true)
 
+	
 	screen.update()
 
 end -- End UI.redraw()
@@ -654,7 +647,7 @@ function UI.handleEncoders(n, delta)
 		params:delta(UI.currentParams[UI.controlIndex][2]["param"], delta)
 	elseif (n == 4) then
 		-- Encoder 4
-		-- do nothing
+		-- Not implemented
 	end
 
 end -- End UI.handleEncoders(n, delta)
@@ -664,7 +657,6 @@ end -- End UI.handleEncoders(n, delta)
 ------------------------------------------
 
 function UI.handleButtons(i)
-
 	if (i == 2) then
 		-- Toggle 1, 2
 		-- Source: https://forums.cockos.com/showthread.php?t=254657
@@ -681,6 +673,8 @@ function UI.init(debug)
 
 	print("Initialising UI module")
 
+	-- Init background image buffer
+	--UI.background = screen.load_png("/home/we/dust/code/bline/lib/ui/png/ui-bg.png")
 	if (debug == true) then
 		UI.debugMode = true
 		print("Setting debug mode ON")
